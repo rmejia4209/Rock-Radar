@@ -93,17 +93,6 @@ class Area(Node):
         if not self._coordinates:
             self._coordinates = coordinates
 
-    def _add_child(self, child: Area | Route) -> None:
-        # TODO: Refactor
-        """Adds a child to children"""
-        if (
-            len(self._children) == 0
-            or isinstance(child, type(self._children[0]))
-        ):
-            self._children.append(child)
-        else:
-            raise Exception("An area can't contain both subareas and routes!")
-
     def calculate_total_num_routes(self) -> int:
         """
         Calculates the total number of routes in an area.

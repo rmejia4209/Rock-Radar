@@ -6,8 +6,10 @@ class Node:
     _parent: Node | None
     _children: list[Node]
     _is_leaf: bool
-    _internal_keys: dict[str: any]
-    _leaf_keys: dict[str: any]
+    _primary_key: str = "name"
+    _primary_key_reverse: bool = False
+    _primary_leaf_key: str = "name"
+    _primary_leaf_key_reverse: bool = False
 
     def __init__(
         self, name: str, *, parent: Node | None = None, is_leaf: bool = False
@@ -80,18 +82,30 @@ class Node:
 
     @property
     def sort_keys(self, **kwargs) -> None:
-        self._internal_node_key = kwargs.get(
-            "internal_node_key", self._internal_node_key
-        )
-        self._primary_leaf_key = kwargs.get(
-            "leaf_node_key", self._internal_node_key
+        """
+        Sets the sorting keys for the entire tree. The sorting keys represent
+        attributes of the node and are passed via a lambda funciton. Accepted
+        arguments are outlined below. Will not changed unspecified keys.
+
+        Args:
+            **kwargs:
+                - primary_key (str): Primary key for internal node sorts
+                - primary_key_direction (bool): True == reversed
+                - primary_leaf_key (bool): Primary key for leaf parent sorts
+                - leaf_node_direction (bool): True == reversed
+    """
+        self._primary_key = kwargs.get(
+            "primary_key", self._primary_key
         )
 
-    def _sort_leaf_nodes(self) -> None:
-        """Sorts the children of a leaf parent node based on the set keys"""
-        self._children.sort(
-            key=lambda node: getattr(node, self._primary_leaf_key),
-            reverse=self._primary_leaf_key_reverse
+        self._primary_key_reverse = kwargs.get(
+            "primary_key_direction", self._primary_key_reverse
+        )
+        self._primary_leaf_key = kwargs.get(
+            "primary_leaf_key", self._internal_node_key
+        )
+        self._primary_leaf_key_reverse = kwargs.get(
+            "primary_leaf_key_direction", self._primary_leaf_key_reverse
         )
 
     def _sort_internal_node(self) -> None:
@@ -99,6 +113,13 @@ class Node:
         self._children.sort(
             key=lambda node: getattr(node, self._primary_key),
             reverse=self._primary_key_reverse
+        )
+
+    def _sort_leaf_nodes(self) -> None:
+        """Sorts the children of a leaf parent node based on the set keys"""
+        self._children.sort(
+            key=lambda node: getattr(node, self._primary_leaf_key),
+            reverse=self._primary_leaf_key_reverse
         )
 
     def sort(self) -> None:

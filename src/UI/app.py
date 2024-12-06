@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         )
 
     def _change_page(self, idx) -> None:
-        """Changes the current page in view"""        
+        """Changes the current page in view"""
         self._pages_layout.setCurrentIndex(idx)
         self._navbar.update_title(
             self._home.title if idx == 0 else self._settings.title
@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
         """Customize the widgets displayed by the app"""
         # title & size
         self.setWindowTitle("Rock Radar")
-        #self.setFixedSize(800, 400)
+        # self.setFixedSize(800, 400)
         qdarktheme.enable_hi_dpi()
         qdarktheme.setup_theme("light")
         return

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from functools import total_ordering
+# from functools import total_ordering
 from custom_types.node import Node
 from custom_types.grade import Grade
 
@@ -64,17 +64,23 @@ class Area(Node):
         super().__init__(name, parent=parent)
 
         self._coordinates = None
-        self._children = []
-
         self._total_routes = 0
         self._matching_routes = 0
         self._raw_score = 0
         self._log_normalize_score = 0
         self._popularity = 0
 
+    def __str__(self):
+        return f"{self._name} ({self._matching_routes})"
+
     @property
     def coordinates(self) -> tuple[float, float] | None:
         return self._coordinates
+
+    @coordinates.setter
+    def coordinates(self, coordinates) -> None:
+        if not self._coordinates:
+            self._coordinates = coordinates
 
     @property
     def route_filter(self) -> RouteFilter:
@@ -87,11 +93,6 @@ class Area(Node):
     @property
     def num_matching_routes(self) -> int:
         return self._matching_routes
-
-    @coordinates.setter
-    def coordinates(self, coordinates) -> None:
-        if not self._coordinates:
-            self._coordinates = coordinates
 
     def calculate_total_num_routes(self) -> int:
         """

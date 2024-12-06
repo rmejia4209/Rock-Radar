@@ -31,6 +31,7 @@ class Home(QWidget):
 
     def _refresh_data(self) -> None:
         self._data.calculate_stats()
+        self._data.sort()
         node = self._side_bar.current_node
         self._area_stats.update(node)
 

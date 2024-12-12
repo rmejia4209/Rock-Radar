@@ -75,16 +75,19 @@ class Area(Node):
 
     @property
     def coordinates(self) -> tuple[float, float] | None:
+        """Returns the areas coordinates"""
         return self._coordinates
 
     @coordinates.setter
     def coordinates(self, coordinates) -> None:
+        """Sets the coordinates of the area"""
         if not self._coordinates:
             self._coordinates = coordinates
 
     @property
     def route_filter(self) -> RouteFilter:
-        return self._route_filter
+        """Returns the class filter attribute"""
+        return type(self)._route_filter
 
     @property
     def total_num_routes(self) -> int:

@@ -53,8 +53,10 @@ class RouteFilter:
 
 
 class Area(Node):
+
     _name: str
     _parent: Area | None
+    _children: list[Area] | list[Route]
     _coordinates: tuple[float, float]
     _children: list[Area] | list[Route]
 
@@ -98,19 +100,18 @@ class Area(Node):
         return self._matching_routes
 
     def calculate_total_num_routes(self) -> int:
-        """
-        Calculates the total number of routes in an area.
-        """
+        """Calculates the total number of routes in an area"""
         # Base case - children are routes
         if self.is_leaf_parent:
             self._total_routes = len(self._children)
-            return self._total_routes
 
         # Recursive case - children are areas
-        self._total_routes = 0
-        for area in self._children:
-            self._total_routes += area.calculate_total_num_routes()
-        return self._total_routes
+        else:
+            self._total_routes = 0
+            for area in self._children:
+                area.calculate_total_num_routes()
+                self._total_routes += area.total_num_routes
+        return
 
     def init_stats(self) -> None:
         self.calculate_total_num_routes()
@@ -128,18 +129,19 @@ class Area(Node):
             "raw_score": self._raw_score
         }
 
-    def calculate_stats(
-        self, route_filter: RouteFilter | None = None
-    ) -> dict[str, int | float]:
-        if route_filter is None:
-            route_filter = self._route_filter
+    def calculate_stats(self) -> None:
+        """Calculates the stats based on the class filter"""
         self.reset_stats()
         for child in self._children:
-            child_stats = child.calculate_stats(route_filter)
+            if self.is_leaf_parent:
+                child.calculate_stats(self.route_filter)
+            else:
+                child.calculate_stats()
+
+            child_stats = child.get_stats()
             self._matching_routes += child_stats.get("matching_routes", 0)
             self._raw_score += child_stats.get("raw_score", 0)
-
-        return self.get_stats()
+        return
 
     def set_filter(self, lower_grade, upper_grade) -> None:
         self._route_filter.lower_grade = lower_grade
@@ -158,6 +160,7 @@ class Route(Node):
     _rating: float
     _popularity: int
     _crag: Area | None
+    _stats: dict[str, int | float]
 
     def __init__(
         self,
@@ -176,33 +179,47 @@ class Route(Node):
 
     @property
     def crag(self) -> Area:
+        """Returns the crag of the route"""
         return self._parent
 
     @crag.setter
     def crag(self, area: Area) -> None:
+        """Sets the parent of the route"""
         self._parent = area
 
     @property
     def name(self) -> str:
+        """Returns the name of the route"""
         return self._name
 
     @property
     def grade(self) -> Grade:
+        """Returns the grade of the route"""
         return self._grade
 
     @property
     def rating(self) -> float:
+        """Returns the rating of the route"""
         return round(self._rating, 2)
+
+    def _set_stats(self, stats: dict[str, int | float]) -> None:
+        """Sets the route's stats"""
+        self._stats = stats
+
+    def get_stats(self) -> dict[str, int | float]:
+        """Returns the route's stats"""
+        return self._stats
 
     def calculate_stats(
         self, route_filter: RouteFilter
     ) -> dict[str, int | float]:
         """
-        TODO:
+        Calculates the route's stats if it meets the filter requirements
         """
-        if not route_filter.is_match(self):
-            return {}
-        return {
-            "matching_routes": 1,
-            "raw_score": round(self._rating * self._popularity, 2)
-        }
+        if route_filter.is_match(self):
+            self._set_stats({
+                "matching_routes": 1,
+                "raw_score": round(self._rating * self._popularity, 2)
+            })
+        else:
+            self._set_stats({})

@@ -128,4 +128,3 @@ class Grade:
         elif self._loose_ge(min_bound) or self._loose_le(max_bound):
             return True
         return False
-

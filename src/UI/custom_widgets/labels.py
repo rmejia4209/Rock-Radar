@@ -39,6 +39,12 @@ class TitleLabel(Label):
         super().__init__(txt, size=36, bold=True, parent=parent)
 
 
+class HeaderLabel(Label):
+    """Label with a bold font size of 16pts"""
+    def __init__(self, txt: str, parent: QWidget) -> None:
+        super().__init__(txt, size=16, bold=True, parent=parent)
+
+
 class ExtraLargeLabel(Label):
     """Label with a bold font size of 36pts"""
     def __init__(self, txt: str, parent: QWidget) -> None:

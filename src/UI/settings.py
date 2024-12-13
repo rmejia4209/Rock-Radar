@@ -1,19 +1,145 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
+from PyQt5.QtWidgets import (
+    QWidget, QPushButton, QFrame, QVBoxLayout, QHBoxLayout
+)
 
-from UI.custom_widgets.labels import TitleLabel
+from UI.custom_widgets.labels import TitleLabel, HeaderLabel
+from UI.custom_widgets.inputs import DropDown
+from custom_types.node import Node
+
+
+class SortBy(QWidget):
+    """
+    TODO: doc string
+    """
+
+    def __init__(
+        self, sorting_options: list[str], obj: str, *, parent: QWidget
+    ) -> None:
+        super().__init__(parent=parent)
+        self._primary_key = DropDown(
+            sorting_options, f'Sort {obj} by', 'Please select', parent=self
+        )
+        self._secondary_key = DropDown(
+            sorting_options, 'then by', 'Please select', parent=self
+        )
+        self._connect_widgets()
+        self._set_style()
+
+    def _connect_widgets(self) -> None:
+        """
+        Connects the drop downs to update the selection in the
+        secondary/primary dropdown when a selection is made in the
+        primary/secondary dropdown.
+        """
+        self._primary_key.item_changed.connect(
+            lambda selected_option: self._clear_selection(
+                selected_option, self._secondary_key
+            )
+        )
+        self._secondary_key.item_changed.connect(
+            lambda selected_option: self._clear_selection(
+                selected_option, self._primary_key
+            )
+        )
+
+    def _clear_selection(self, option: str, dropdown: DropDown) -> None:
+        """
+        Resets the selection in dropdown if the dropdown's current value
+        is equal to the given option
+        """
+        if dropdown.current_val == option:
+            dropdown.reset()
+
+    def _set_style(self) -> None:
+        """Sets the layout of the widget"""
+        layout = QVBoxLayout()
+        for widget in [self._primary_key, self._secondary_key]:
+            layout.addWidget(widget)
+        self.setLayout(layout)
+
+    def get_selections(self) -> dict[str, str]:
+        """Returns the current selctions"""
+        if (
+            not self._primary_key.current_val
+            or not self._secondary_key.current_val
+        ):
+            return {}
+        return {
+            'primary': self._primary_key.current_val,
+            'secondary': self._secondary_key.current_val
+        }
+
+
+class SortingSettings(QFrame):
+    """
+    TODO: doc string
+    """
+
+    def __init__(
+        self, area_options: list[str], crag_options: list[str],
+        *, parent: QWidget
+    ) -> None:
+        super().__init__(parent=parent)
+        self._title = HeaderLabel('Sorting Settings', parent=self)
+        self._area_sorting = SortBy(area_options, 'area', parent=self)
+        self._crag_sorting = SortBy(crag_options, 'crag', parent=self)
+        self._set_style()
+
+    def _set_style(self) -> None:
+        """Sets the layout of the widget"""
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(self._title)
+        dropdowns = QHBoxLayout()
+        for widget in [self._area_sorting, self._crag_sorting]:
+            dropdowns.addWidget(widget)
+        main_layout.addLayout(dropdowns)
+        self.setLayout(main_layout)
+        self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
+        self.setLineWidth(1)
+
+    def get_selections(self) -> dict[str, str] | None:
+        area_options = self._area_sorting.get_selections()
+        crag_options = self._crag_sorting.get_selections()
+
+        if not area_options or not crag_options:
+            return {}
+        return {
+            "node": area_options,
+            "leaf": crag_options
+        }
 
 
 class Settings(QWidget):
     """.DS_Store"""
-    def __init__(self, parent: QWidget):
+    def __init__(self, data_root: Node, *, parent: QWidget):
         super().__init__(parent=parent)
+        self._data_root = data_root
+        area_options = data_root.node_sort_keys
+        crag_options = data_root.leaf_sort_keys
+        self._sort_settings = SortingSettings(
+            area_options, crag_options, parent=self
+        )
+        self._apply = QPushButton("Apply")
+        self._connect_widgets()
+        self._set_style()
 
     @property
     def title(self):
         return "Settings"
 
+    def _connect_widgets(self):
+        self._apply.clicked.connect(self.apply_sort_settings)
+
     def _set_style(self) -> None:
         """TODO:"""
         layout = QVBoxLayout()
-        layout.addWidget(TitleLabel("Settings", self))
+        layout.addWidget(self._sort_settings)
+        layout.addWidget(self._apply)
         self.setLayout(layout)
+
+    def apply_sort_settings(self) -> None:
+        """Applies the current selections to the sort settings"""
+        sort_keys = self._sort_settings.get_selections()
+        if sort_keys:
+            self._data_root.set_sort_keys(sort_keys)
+            self._data_root.sort()

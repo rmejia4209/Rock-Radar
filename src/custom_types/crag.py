@@ -59,8 +59,34 @@ class Area(Node):
     _children: list[Area] | list[Route]
     _coordinates: tuple[float, float]
     _children: list[Area] | list[Route]
+    _total_routes: int
+    _matching_routes: int
+    _popularity: int
+    _rating: float
+    __score: float
+    _avg_popularity: float
+    _avg_rating: float
+    _avg_score: float
 
     _route_filter: RouteFilter = RouteFilter()
+    _node_attributes: dict[str, str] = {
+        "name": "_name",
+        "matches": "_matching_routes",
+        "total number of routes": "_total_routes",
+        "popularity": "_popularity",
+        "rating": "_rating",
+        "score": "_score",  # TODO: only raw score available
+        "average popularity": "_avg_popularity",
+        "average rating": "_avg_rating",
+        "average score": "_avg_score"
+    }
+    _leaf_attributes: dict[str, str] = {
+        "name": "_name",
+        "grade": "_grade",
+        "popularity": "_popularity",
+        "rating": "_rating",
+        "score": "_score",  # TODO: only raw score available
+    }
 
     def __init__(self, name: str, parent: Area | None = None):
         super().__init__(name, parent=parent)
@@ -68,9 +94,12 @@ class Area(Node):
         self._coordinates = None
         self._total_routes = 0
         self._matching_routes = 0
-        self._raw_score = 0
-        self._log_normalize_score = 0
         self._popularity = 0
+        self._rating = 0
+        self._score = 0
+        self._avg_popularity = 0
+        self._avg_rating = 0
+        self._avg_score = 0
 
     def __str__(self):
         return f"{self._name} ({self._matching_routes})"
@@ -115,19 +144,41 @@ class Area(Node):
 
     def init_stats(self) -> None:
         self.calculate_total_num_routes()
-        self.calculate_stats(self._route_filter)
+        self.calculate_stats()
         return
 
     def reset_stats(self) -> None:
         """Method to reset the stats"""
         self._matching_routes = 0
-        self._raw_score = 0
+        self._popularity = 0
+        self._rating = 0
+        self._score = 0
 
     def get_stats(self) -> dict[str, int | float]:
         return {
             "matching_routes": self._matching_routes,
-            "raw_score": self._raw_score
+            "popularity": self._popularity,
+            "rating": self._rating,
+            "score": self._score
         }
+
+    def increment_stats(self, child_stats: dict[str, int]) -> None:
+        """Increments stats based on childrent stats"""
+        self._matching_routes += child_stats.get("matching_routes", 0)
+        self._popularity += child_stats.get("popularity", 0)
+        self._rating += child_stats.get("rating", 0)
+        self._score += child_stats.get("score", 0)
+
+    def calculate_averages(self) -> None:
+        """Calculates the averaged stats"""
+        avgs = ["_avg_popularity", "_avg_rating", "_avg_score"]
+        stats = ["_popularity", "_rating", "_score"]
+        for avg, stat in zip(avgs, stats):
+            if self._matching_routes == 0:
+                setattr(self, avg, 0)
+            else:
+                val = round((getattr(self, stat) / self._matching_routes), 0)
+                setattr(self, avg, val)
 
     def calculate_stats(self) -> None:
         """Calculates the stats based on the class filter"""
@@ -137,10 +188,8 @@ class Area(Node):
                 child.calculate_stats(self.route_filter)
             else:
                 child.calculate_stats()
-
-            child_stats = child.get_stats()
-            self._matching_routes += child_stats.get("matching_routes", 0)
-            self._raw_score += child_stats.get("raw_score", 0)
+            self.increment_stats(child.get_stats())
+        self.calculate_averages()
         return
 
     def set_filter(self, lower_grade, upper_grade) -> None:
@@ -219,7 +268,9 @@ class Route(Node):
         if route_filter.is_match(self):
             self._set_stats({
                 "matching_routes": 1,
-                "raw_score": round(self._rating * self._popularity, 2)
+                "popularity": self._popularity,
+                "rating": self._rating,
+                "score": round(self._rating * self._popularity, 2)  # TODO: fix
             })
         else:
             self._set_stats({})

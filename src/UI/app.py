@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         self._data = data_root
         self._navbar = NavBar(f"{self._data}", parent=self)
         self._home = Home(data_root, parent=self)
-        self._settings = Settings(parent=self)
+        self._settings = Settings(data_root, parent=self)
         self._connect_widgets()
 
         self._pages_layout = QStackedLayout()

@@ -26,7 +26,9 @@ class GradeDropDown(DropDown):
             parent (QWidget): The parent of the widget.
         """
         place_holder_txt = "Please Select Grade"
-        super().__init__(self._grades, label, place_holder_txt, parent=parent)
+        super().__init__(
+            type(self)._grades, label, place_holder_txt, parent=parent
+        )
 
     @property
     def grade(self) -> Grade | None:
@@ -40,7 +42,7 @@ class GradeDropDown(DropDown):
         """
         Returns the index of the matching grade in _grades
         """
-        for idx, grade in enumerate(self._grades):
+        for idx, grade in enumerate(type(self)._grades):
             if grade_bound == grade:
                 return idx
 
@@ -50,7 +52,7 @@ class GradeDropDown(DropDown):
         (i.e., removes grades from index 0 to index start)
         """
         start = self._find_idx(min_grade)
-        self.update_items(self._grades[start:])
+        self.update_items(type(self)._grades[start:])
 
     def update_max(self, max_grade: Grade) -> None:
         """
@@ -58,7 +60,7 @@ class GradeDropDown(DropDown):
         (i.e., removes grades from index end+1 to len(_grades))
         """
         end = self._find_idx(max_grade)
-        self.update_items(self._grades[:end+1])
+        self.update_items(type(self)._grades[:end+1])
 
 
 class RouteFilter(QFrame):

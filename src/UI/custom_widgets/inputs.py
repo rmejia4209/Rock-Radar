@@ -59,13 +59,15 @@ class DropDown(QFrame):
     This widget also has a label above the dropdown.
 
     Attributes:
-        _drop_down (_BaseDropDown): The dropdown of this widget.
-        _emit_data (bool): A boolean used to prevent the emission of a signal
-                           when the options are updated.
+        _drop_down (_BaseDropDown):
+            The dropdown of this widget.
+        _emit_data (bool):
+            A boolean used to prevent the emission of a signal when the
+            options are updated.
 
     Signals:
-        item_changed (pyqtSignal): emit's the currently selected data
-                                       after the selection has changed.
+        item_changed (pyqtSignal):
+            emit's the currently selected data after the selection has changed.
     """
     item_changed: pyqtSignal = pyqtSignal(object)
     _dropdown: _BaseDropDown
@@ -108,6 +110,9 @@ class DropDown(QFrame):
     def current_val(self) -> any:
         """Returns the dropdown's current value"""
         return self._dropdown.currentData()
+
+    def reset(self) -> None:
+        self._dropdown.setCurrentIndex(-1)
 
     def update_items(self, vals: list[any]) -> None:
         """

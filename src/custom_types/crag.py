@@ -2,6 +2,7 @@ from __future__ import annotations
 # from functools import total_ordering
 from custom_types.node import Node
 from custom_types.grade import Grade
+from custom_types.ranking_model import RankingModel
 
 
 class RouteFilter:
@@ -69,6 +70,7 @@ class Area(Node):
     _avg_score: float
 
     _route_filter: RouteFilter = RouteFilter()
+    _ranking_model: RankingModel = RankingModel()
     _node_attributes: dict[str, str] = {
         "name": "_name",
         "matches": "_matching_routes",
@@ -185,7 +187,9 @@ class Area(Node):
         self.reset_stats()
         for child in self._children:
             if self.is_leaf_parent:
-                child.calculate_stats(self.route_filter)
+                child.calculate_stats(
+                    type(self)._route_filter, type(self)._ranking_model
+                )
             else:
                 child.calculate_stats()
             self.increment_stats(child.get_stats())
@@ -196,6 +200,13 @@ class Area(Node):
         self._route_filter.lower_grade = lower_grade
         self._route_filter.upper_grade = upper_grade
         # Recalculate stats here
+
+    def set_ranking_model(
+        self, model: str, popularity: int, trust: int
+    ) -> None:
+        """Set the ranking model"""
+        type(self)._ranking_model.set_model(model, popularity, trust)
+        return
 
 
 class Route(Node):
@@ -260,17 +271,18 @@ class Route(Node):
         return self._stats
 
     def calculate_stats(
-        self, route_filter: RouteFilter
+        self, route_filter: RouteFilter, ranking_model: RankingModel
     ) -> dict[str, int | float]:
         """
         Calculates the route's stats if it meets the filter requirements
         """
         if route_filter.is_match(self):
+            score = ranking_model.get_score(self._popularity, self._rating)
             self._set_stats({
                 "matching_routes": 1,
                 "popularity": self._popularity,
                 "rating": self._rating,
-                "score": round(self._rating * self._popularity, 2)  # TODO: fix
+                "score": score
             })
         else:
             self._set_stats({})

@@ -116,13 +116,13 @@ class Node:
             "primary_key", type(self)._primary_key
         )
         type(self)._secondary_key = kwargs.get(
-            "secondary_key", type(self)._primary_key
+            "secondary_key", type(self)._secondary_key
         )
         type(self)._primary_leaf_key = kwargs.get(
             "primary_leaf_key", type(self)._primary_leaf_key
         )
         type(self)._secondary_leaf_key = kwargs.get(
-            "secondary_leaf_key", type(self)._primary_leaf_key
+            "secondary_leaf_key", type(self)._secondary_leaf_key
         )
         return
 

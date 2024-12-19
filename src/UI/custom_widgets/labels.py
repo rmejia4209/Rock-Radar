@@ -57,6 +57,12 @@ class SmallBoldLabel(Label):
         super().__init__(txt, size=12, bold=True, parent=parent)
 
 
+class SmallLabel(Label):
+    """Label with a bold font size of 12pts"""
+    def __init__(self, txt: str, parent: QWidget) -> None:
+        super().__init__(txt, size=12, parent=parent)
+
+
 class RegularLabel(Label):
     """Label with a font size of 14pts"""
     def __init__(self, txt: str, parent: QWidget) -> None:

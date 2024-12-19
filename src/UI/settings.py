@@ -1,10 +1,12 @@
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QFrame, QVBoxLayout, QHBoxLayout
+    QWidget, QPushButton, QFrame, QVBoxLayout, QHBoxLayout, QLineEdit
 )
 
 from UI.custom_widgets.labels import TitleLabel, HeaderLabel
-from UI.custom_widgets.inputs import DropDown
-from custom_types.node import Node
+from UI.custom_widgets.inputs import (
+    DropDown, RadioButtons, Slider, NumLineEdit
+)
+from custom_types.crag import Area
 
 
 class SortBy(QWidget):
@@ -109,15 +111,64 @@ class SortingSettings(QFrame):
         }
 
 
+class ModelOptions(QFrame):
+    def __init__(
+        self, options: list[str], logistic_coefficient_limits: tuple[int, int],
+        *, parent: QWidget
+    ) -> None:
+        """TODO"""
+        super().__init__(parent=parent)
+        self._title = HeaderLabel('Model Options', parent=self)
+        self._model_options = RadioButtons(options, parent=self)
+        self._min_popularity = NumLineEdit(
+            'Min Popularity:', 'e.g., 25', min_val=0, max_val=1000, parent=self
+        )
+        min_val, max_val = logistic_coefficient_limits
+        self._trust_slider = Slider(
+            min_val=min_val, max_val=max_val, resolution=1000,
+            label="Trust Parameter", parent=self
+        )
+        self._set_style()
+
+    def _set_style(self) -> None:
+        """Sets the layout of the widget"""
+        layout = QVBoxLayout()
+        widgets = [
+            self._title, self._model_options, self._min_popularity,
+            self._trust_slider
+        ]
+        for widget in widgets:
+            layout.addWidget(widget)
+        self.setLayout(layout)
+        self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
+        self.setLineWidth(1)
+
+    def get_selection(self) -> str:
+        """Returns the currently selected model"""
+        return self._model_options.current_val
+
+    def get_coefficients(self) -> tuple[float, int]:
+        """Returns the currently set coefficents (trust, population)"""
+        trust = self._trust_slider.current_val
+        min_popularity = self._min_popularity.current_val
+        return trust, min_popularity
+    
+
 class Settings(QWidget):
     """.DS_Store"""
-    def __init__(self, data_root: Node, *, parent: QWidget):
+    def __init__(self, data_root: Area, *, parent: QWidget):
         super().__init__(parent=parent)
         self._data_root = data_root
         area_options = data_root.node_sort_keys
         crag_options = data_root.leaf_sort_keys
         self._sort_settings = SortingSettings(
             area_options, crag_options, parent=self
+        )
+        self._data_root.logistic_coefficient_limits
+        self._model_options = ModelOptions(
+            self._data_root.get_models(),
+            self._data_root.logistic_coefficient_limits,
+            parent=self
         )
         self._apply = QPushButton("Apply")
         self._connect_widgets()
@@ -133,12 +184,23 @@ class Settings(QWidget):
     def _set_style(self) -> None:
         """TODO:"""
         layout = QVBoxLayout()
-        layout.addWidget(self._sort_settings)
+        widget_layout = QHBoxLayout()
+        for widget in [self._sort_settings, self._model_options]:
+            widget_layout.addWidget(widget)
+        layout.addLayout(widget_layout)
         layout.addWidget(self._apply)
         self.setLayout(layout)
 
     def apply_sort_settings(self) -> None:
         """Applies the current selections to the sort settings"""
+        model = self._model_options.get_selection()
+        if model == 'Logistic':
+            trust, popularity = self._model_options.get_coefficients()
+            print(trust, popularity)
+            self._data_root.set_ranking_model(model, popularity, trust)
+        elif model:
+            self._data_root.set_ranking_model(model)
+
         sort_keys = self._sort_settings.get_selections()
         if sort_keys:
             self._data_root.set_sort_keys(sort_keys)

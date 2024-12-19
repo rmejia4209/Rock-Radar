@@ -201,8 +201,17 @@ class Area(Node):
         self._route_filter.upper_grade = upper_grade
         # Recalculate stats here
 
+    def get_models(self) -> list[str]:
+        """Returns the available ranking model options"""
+        return type(self)._ranking_model.get_options()
+
+    @property
+    def logistic_coefficient_limits(self) -> tuple[int, int]:
+        return type(self)._ranking_model.get_logistic_coefficient_limits()
+
     def set_ranking_model(
-        self, model: str, popularity: int, trust: int
+        self, model: str, popularity: int | None = None,
+        trust: int | None = None
     ) -> None:
         """Set the ranking model"""
         type(self)._ranking_model.set_model(model, popularity, trust)
@@ -236,6 +245,7 @@ class Route(Node):
         self._length = length
         self._rating = rating
         self._popularity = popularity
+        self._score = 0
 
     @property
     def crag(self) -> Area:
@@ -277,12 +287,14 @@ class Route(Node):
         Calculates the route's stats if it meets the filter requirements
         """
         if route_filter.is_match(self):
-            score = ranking_model.get_score(self._popularity, self._rating)
+            self._score = ranking_model.get_score(
+                self._popularity, self._rating
+            )
             self._set_stats({
                 "matching_routes": 1,
                 "popularity": self._popularity,
                 "rating": self._rating,
-                "score": score
+                "score": self._score
             })
         else:
             self._set_stats({})

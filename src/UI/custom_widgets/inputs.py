@@ -1,9 +1,12 @@
 # from PyQt5.QtCore import QSize
-# from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QFrame, QComboBox, QVBoxLayout
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QIntValidator  # QFont
+from PyQt5.QtWidgets import (
+    QWidget, QFrame, QComboBox, QRadioButton, QVBoxLayout, QHBoxLayout,
+    QSlider, QLineEdit
+)
+from PyQt5.QtCore import Qt, pyqtSignal
 
-from UI.custom_widgets.labels import SmallBoldLabel
+from UI.custom_widgets.labels import SmallBoldLabel, SmallLabel
 
 
 class _BaseDropDown(QComboBox):
@@ -101,7 +104,7 @@ class DropDown(QFrame):
     def _set_style(self, label) -> None:
         """Sets the layout/style of the widget"""
         layout = QVBoxLayout()
-        for widget in [SmallBoldLabel(label, parent=self), self._dropdown]:
+        for widget in [SmallLabel(label, parent=self), self._dropdown]:
             layout.addWidget(widget)
         layout.setSpacing(0)
         self.setLayout(layout)
@@ -122,3 +125,147 @@ class DropDown(QFrame):
         self._emit_data = False
         self._dropdown.update_items(vals)
         self._emit_data = True
+
+
+class RadioButtons(QFrame):
+    """TODO"""
+    _options: list[QRadioButton]
+
+    def __init__(
+        self, options, *, orient_horizontally: bool = False, parent: QWidget
+    ) -> None:
+        """TODO"""
+        super().__init__(parent=parent)
+        self._current_val = None
+        self._create_radio_buttons(options)
+        self._set_style(orient_horizontally)
+
+    def _create_radio_buttons(self, options) -> None:
+        """TODO:
+        creats radio buttons and connects them
+        """
+        self._options = []
+        for option in options:
+            self._options.append(
+                QRadioButton(option.capitalize(), parent=self)
+            )
+
+    def _set_style(self, orient_horizontally) -> None:
+        layout = QHBoxLayout() if orient_horizontally else QVBoxLayout()
+        for option in self._options:
+            layout.addWidget(option)
+        self.setLayout(layout)
+
+    @property
+    def current_val(self) -> str | None:
+        """TODO: does what you think it does"""
+        for option in self._options:
+            if option.isChecked():
+                return option.text()
+
+
+class BaseSlider(QSlider):
+    """TODO:"""
+    def __init__(
+        self, *, min_val: int | float, max_val: int | float, parent: QWidget,
+        resolution: int | None = None
+    ) -> None:
+        super().__init__(Qt.Horizontal, parent=parent)
+        self._set_limits(min_val, max_val, resolution)
+        return
+
+    @staticmethod
+    def _calculate_resolution(min_val):
+        """Calculates the resultion"""
+        if isinstance(min_val, int):
+            return 1
+        return 10 * len(str(min_val).split('.')[1])
+
+    def _set_limits(
+        self, min_val: int | float, max_val: int | float,
+        resolution: int | None
+    ) -> None:
+        """Sets the limits of the slider"""
+        if resolution is None:
+            self._resolution = BaseSlider._calculate_resolution(min_val)
+        else:
+            self._resolution = resolution
+
+        self.setMinimum(int(min_val * self._resolution))
+        self.setMaximum(int(max_val * self._resolution))
+        return
+
+    @property
+    def current_val(self) -> float:
+        """Returns the current value divided by the multiple"""
+        return self.value() / self._resolution
+
+
+class Slider(QWidget):
+    """TODO:"""
+    def __init__(
+        self, *, min_val: int | float, max_val: int | float, label: str,
+        parent: QWidget, resolution: int | None = None
+    ) -> None:
+        super().__init__(parent=parent)
+        self._slider = BaseSlider(
+            min_val=min_val, max_val=max_val, resolution=resolution,
+            parent=self
+        )
+        self._set_style(label)
+        return
+
+    def _set_style(self, label: str) -> None:
+        """TODO"""
+        layout = QHBoxLayout()
+        layout.addWidget(SmallLabel(label, parent=self))
+        layout.addWidget(self._slider)
+        self.setLayout(layout)
+
+    @property
+    def current_val(self) -> float:
+        """Returns the current value divided by the multiple"""
+        return self._slider.current_val
+
+
+class BaseNumLineEdit(QLineEdit):
+    """TODO"""
+    def __init__(
+        self, *, example_txt: str, min_val: int, max_val: int, parent: QWidget
+    ) -> None:
+        """TODO"""
+        super().__init__(parent=parent)
+        self.setPlaceholderText(example_txt)
+        self.setValidator(QIntValidator(min_val, max_val))
+
+    @property
+    def current_val(self) -> int:
+        """Returns the current value"""
+        return int(self.text())
+
+
+class NumLineEdit(QFrame):
+    """TODO"""
+    def __init__(
+        self, label: str, example_txt: str, min_val: str, max_val: int, 
+        *, parent: QWidget
+    ) -> None:
+        super().__init__(parent=parent)
+        self._num_input = BaseNumLineEdit(
+            example_txt=example_txt, min_val=min_val, max_val=max_val,
+            parent=self
+        )
+        self._set_style(label)
+
+    def _set_style(self, label: str) -> None:
+        """TODO"""
+        layout = QHBoxLayout()
+        layout.addWidget(SmallLabel(label, parent=self))
+        layout.addWidget(self._num_input)
+        self.setLayout(layout)
+        return
+
+    @property
+    def current_val(self) -> int:
+        """Returns the current value"""
+        return self._num_input.current_val

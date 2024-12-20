@@ -18,7 +18,7 @@ class MainWindow(QMainWindow):
         """TODO: write doc string"""
         super().__init__()
         self._data = data_root
-        self._navbar = NavBar(f"{self._data}", parent=self)
+        self._navbar = NavBar(f"{self._data.name}", parent=self)
         self._home = Home(data_root, parent=self)
         self._settings = Settings(data_root, parent=self)
         self._connect_widgets()

@@ -77,7 +77,7 @@ class Area(Node):
         "total number of routes": "_total_routes",
         "popularity": "_popularity",
         "rating": "_rating",
-        "score": "_score",  # TODO: only raw score available
+        "score": "_score",
         "average popularity": "_avg_popularity",
         "average rating": "_avg_rating",
         "average score": "_avg_score"
@@ -87,8 +87,11 @@ class Area(Node):
         "grade": "_grade",
         "popularity": "_popularity",
         "rating": "_rating",
-        "score": "_score",  # TODO: only raw score available
+        "score": "_score",
+        "number of pitches": "_num_pitches",
+        "length": "_length"
     }
+    _metric: str = "_matching_routes"
 
     def __init__(self, name: str, parent: Area | None = None):
         super().__init__(name, parent=parent)
@@ -104,7 +107,12 @@ class Area(Node):
         self._avg_score = 0
 
     def __str__(self):
-        return f"{self._name} ({self._matching_routes})"
+        metric = getattr(self, Area._metric)
+        if isinstance(metric, float):
+            metric = f" ({(round(metric, 1))})"
+        else:
+            metric = f" ({metric})"
+        return f"{self._name}{metric}"
 
     @property
     def coordinates(self) -> tuple[float, float] | None:
@@ -129,6 +137,54 @@ class Area(Node):
     @property
     def num_matching_routes(self) -> int:
         return self._matching_routes
+
+    @property
+    def models(self) -> list[str]:
+        """Returns the available ranking model options"""
+        return type(self)._ranking_model.get_options()
+
+    @property
+    def logistic_coefficient_limits(self) -> tuple[int, int]:
+        return type(self)._ranking_model.get_logistic_coefficient_limits()
+
+    def get_area_metrics(self) -> list[str]:
+        """
+        Returns the available statistics that may be displayed when printed
+        """
+        metrics = [stat.title() for stat in type(self)._node_attributes.keys()]
+        for metric in ['Name', 'Popularity', 'Score', "Rating"]:
+            metrics.remove(metric)
+        return metrics
+
+    def set_area_metric(self, metric: str) -> None:
+        """Sets the metric that is displayed"""
+        type(self)._metric = type(self)._node_attributes.get(metric.lower())
+
+    def get_crag_metrics(self) -> list[str]:
+        """
+        Returns the available statistics that may be displayed when printed
+        """
+        metrics = [stat.title() for stat in type(self)._leaf_attributes.keys()]
+        for metric in ['Name', 'Grade', 'Score', "Rating"]:
+            metrics.remove(metric)
+        return metrics
+
+    def set_crag_metric(self, metric: str) -> None:
+        """Sets the metric that is displayed"""
+        Route._metric = type(self)._leaf_attributes.get(metric.lower())
+
+    def set_filter(self, lower_grade, upper_grade) -> None:
+        self._route_filter.lower_grade = lower_grade
+        self._route_filter.upper_grade = upper_grade
+        # Recalculate stats here
+
+    def set_ranking_model(
+        self, model: str, popularity: int | None = None,
+        trust: int | None = None
+    ) -> None:
+        """Set the ranking model"""
+        type(self)._ranking_model.set_model(model, popularity, trust)
+        return
 
     def calculate_total_num_routes(self) -> int:
         """Calculates the total number of routes in an area"""
@@ -179,8 +235,10 @@ class Area(Node):
             if self._matching_routes == 0:
                 setattr(self, avg, 0)
             else:
-                val = round((getattr(self, stat) / self._matching_routes), 0)
+                val = round((getattr(self, stat) / self._matching_routes), 1)
                 setattr(self, avg, val)
+        self._avg_popularity = int(self._avg_popularity)
+        return
 
     def calculate_stats(self) -> None:
         """Calculates the stats based on the class filter"""
@@ -196,27 +254,6 @@ class Area(Node):
         self.calculate_averages()
         return
 
-    def set_filter(self, lower_grade, upper_grade) -> None:
-        self._route_filter.lower_grade = lower_grade
-        self._route_filter.upper_grade = upper_grade
-        # Recalculate stats here
-
-    def get_models(self) -> list[str]:
-        """Returns the available ranking model options"""
-        return type(self)._ranking_model.get_options()
-
-    @property
-    def logistic_coefficient_limits(self) -> tuple[int, int]:
-        return type(self)._ranking_model.get_logistic_coefficient_limits()
-
-    def set_ranking_model(
-        self, model: str, popularity: int | None = None,
-        trust: int | None = None
-    ) -> None:
-        """Set the ranking model"""
-        type(self)._ranking_model.set_model(model, popularity, trust)
-        return
-
 
 class Route(Node):
     _id: str
@@ -230,13 +267,14 @@ class Route(Node):
     _popularity: int
     _crag: Area | None
     _stats: dict[str, int | float]
+    _metric: str = "_rating"
 
     def __init__(
         self,
         mp_id: str, name: str, url: str, grade: str, route_types: list[str],
         num_pitches: int, length: int, rating: float, popularity: int
     ) -> None:
-        super().__init__(f"{name} ({grade})", is_leaf=True)
+        super().__init__(name, is_leaf=True)
         self._id = mp_id
         self._url = url
         self._grade = Grade(grade)
@@ -246,6 +284,16 @@ class Route(Node):
         self._rating = rating
         self._popularity = popularity
         self._score = 0
+
+    def __str__(self):
+        metric = getattr(self, Route._metric)
+        if isinstance(metric, float):
+            metric = f" ({round(metric, 1)})"
+        else:
+            # Do not display length metric if it is 1
+            metric = f" ({metric})" if metric > 1 else ""
+
+        return f"{self._name} {self._grade}{metric}"
 
     @property
     def crag(self) -> Area:

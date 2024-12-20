@@ -63,12 +63,12 @@ class Node:
     @property
     def node_sort_keys(self) -> list[str]:
         """Returns the valid inner node sorting keys"""
-        return [val for val in type(self)._node_attributes.keys()]
+        return [val.title() for val in type(self)._node_attributes.keys()]
 
     @property
     def leaf_sort_keys(self) -> list[str]:
         """Returns the valid leaf sorting keys"""
-        return [val for val in type(self)._leaf_attributes.keys()]
+        return [val.title() for val in type(self)._leaf_attributes.keys()]
 
     def _add_leaf(self, child: Node) -> None:
         """
@@ -128,10 +128,18 @@ class Node:
 
     def set_sort_keys(self, sort_keys: dict[str, str]) -> None:
         """Sets the sort keys based on the provided dictionary"""
-        node_p = type(self)._node_attributes[sort_keys['node']['primary']]
-        node_s = type(self)._node_attributes[sort_keys['node']['secondary']]
-        leaf_p = type(self)._leaf_attributes[sort_keys['leaf']['primary']]
-        leaf_s = type(self)._leaf_attributes[sort_keys['leaf']['secondary']]
+        node_p = type(self)._node_attributes[
+            sort_keys['node']['primary'].lower()
+        ]
+        node_s = type(self)._node_attributes[
+            sort_keys['node']['secondary'].lower()
+        ]
+        leaf_p = type(self)._leaf_attributes[
+            sort_keys['leaf']['primary'].lower()
+        ]
+        leaf_s = type(self)._leaf_attributes[
+            sort_keys['leaf']['secondary'].lower()
+        ]
         self._set_sort_keys(
             primary_key=node_p, secondary_key=node_s,
             primary_leaf_key=leaf_p, secondary_leaf_key=leaf_s
@@ -152,9 +160,15 @@ class Node:
 
     def _sort_leaf_nodes(self) -> None:
         """Sorts the children of a leaf parent node based on the set keys"""
+        bandaid = {'_length': 1, '_num_pitches': 1, '_grade': 'a'}
         reversed_order = (
-            not isinstance(getattr(
-                self, type(self)._primary_leaf_key, 'bandaid solution'), str
+            not isinstance(
+                getattr(
+                    self,
+                    type(self)._primary_leaf_key,
+                    bandaid[type(self)._primary_leaf_key]
+                ),
+                str
             )
         )
         self._children.sort(

@@ -83,8 +83,8 @@ class SortingSettings(QFrame):
     ) -> None:
         super().__init__(parent=parent)
         self._title = HeaderLabel('Sorting Settings', parent=self)
-        self._area_sorting = SortBy(area_options, 'area', parent=self)
-        self._crag_sorting = SortBy(crag_options, 'crag', parent=self)
+        self._area_sorting = SortBy(area_options, 'crags', parent=self)
+        self._crag_sorting = SortBy(crag_options, 'routes', parent=self)
         self._set_style()
 
     def _set_style(self) -> None:
@@ -152,7 +152,39 @@ class ModelOptions(QFrame):
         trust = self._trust_slider.current_val
         min_popularity = self._min_popularity.current_val
         return trust, min_popularity
-    
+
+
+class MetricSelection(QFrame):
+    def __init__(
+        self, area_options: list[str], crag_options: list[str],
+        *, parent: QWidget
+    ) -> None:
+        """TODO"""
+        super().__init__(parent=parent)
+        self._title = HeaderLabel('Metrics', parent=self)
+
+        self._area_metrics = DropDown(
+            area_options, "Crag Metric", "Please Select", parent=self
+        )
+        self._crag_metrics = DropDown(
+            crag_options, "Route Metric", "Please Select", parent=self
+        )
+        self._set_style()
+
+    def _set_style(self) -> None:
+        """Set the style of the widget"""
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(self._title)
+        options = QHBoxLayout()
+        for widget in [self._area_metrics, self._crag_metrics]:
+            options.addWidget(widget)
+        main_layout.addLayout(options)
+        self.setLayout(main_layout)
+
+    def get_selections(self) -> None:
+        """Returns the current selections"""
+        return self._area_metrics.current_val, self._crag_metrics.current_val
+
 
 class Settings(QWidget):
     """.DS_Store"""
@@ -166,13 +198,19 @@ class Settings(QWidget):
         )
         self._data_root.logistic_coefficient_limits
         self._model_options = ModelOptions(
-            self._data_root.get_models(),
+            self._data_root.models,
             self._data_root.logistic_coefficient_limits,
+            parent=self
+        )
+        self._metrics = MetricSelection(
+            self._data_root.get_area_metrics(),
+            self._data_root.get_crag_metrics(),
             parent=self
         )
         self._apply = QPushButton("Apply")
         self._connect_widgets()
         self._set_style()
+        print("Released")
 
     @property
     def title(self):
@@ -181,27 +219,53 @@ class Settings(QWidget):
     def _connect_widgets(self):
         self._apply.clicked.connect(self.apply_sort_settings)
 
+    def _group_left_side(self):
+        layout = QVBoxLayout()
+        for widget in [self._sort_settings, self._metrics]:
+            layout.addWidget(widget)
+        return layout
+
+    def _group_right_side(self):
+        layout = QVBoxLayout()
+        layout.addWidget(self._model_options)
+        return layout
+
     def _set_style(self) -> None:
         """TODO:"""
-        layout = QVBoxLayout()
+        main_layout = QVBoxLayout()
         widget_layout = QHBoxLayout()
-        for widget in [self._sort_settings, self._model_options]:
-            widget_layout.addWidget(widget)
-        layout.addLayout(widget_layout)
-        layout.addWidget(self._apply)
-        self.setLayout(layout)
+        for layout in [self._group_left_side(), self._group_right_side()]:
+            widget_layout.addLayout(layout)
+        main_layout.addLayout(widget_layout)
+        main_layout.addWidget(self._apply)
+        self.setLayout(main_layout)
 
-    def apply_sort_settings(self) -> None:
-        """Applies the current selections to the sort settings"""
+    def _set_model(self) -> None:
+        """Attempts to set the model if selected"""
         model = self._model_options.get_selection()
         if model == 'Logistic':
             trust, popularity = self._model_options.get_coefficients()
-            print(trust, popularity)
             self._data_root.set_ranking_model(model, popularity, trust)
         elif model:
             self._data_root.set_ranking_model(model)
 
+    def _set_sort_keys(self) -> None:
+        """Attempts to set the sorting keys if selected"""
         sort_keys = self._sort_settings.get_selections()
         if sort_keys:
             self._data_root.set_sort_keys(sort_keys)
             self._data_root.sort()
+
+    def _set_display_metrics(self) -> None:
+        """Attempts to set the display metrics"""
+        area_metric, crag_metric = self._metrics.get_selections()
+        if area_metric:
+            self._data_root.set_area_metric(area_metric)
+        if crag_metric:
+            self._data_root.set_crag_metric(crag_metric)
+
+    def apply_sort_settings(self) -> None:
+        """Applies the current selections to the sort settings"""
+        self._set_model()
+        self._set_display_metrics()
+        self._set_sort_keys()

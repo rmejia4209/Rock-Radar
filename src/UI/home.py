@@ -44,7 +44,7 @@ class Home(QWidget):
     def _update_stats_and_title(self, node: Node) -> None:
         """Updates the stats and title with the given node"""
         self._area_stats.update(node)
-        self.node_changed.emit(f"{node}")
+        self.node_changed.emit(f"{node.name}")
         return
 
     def _create_details_layout(self) -> QVBoxLayout:

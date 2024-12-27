@@ -28,7 +28,7 @@ class RankingModel:
         """
         Returns the product of the log of the popularity and the rating.
         """
-        return round(math.log(popularity)*rating, 2)
+        return round(math.log(popularity+1)*rating, 2)
 
     def _logistic_score(self, popularity: int, rating: float) -> float:
         """Returns a score based on a logistic function."""
@@ -50,7 +50,7 @@ class RankingModel:
         self, model: str, popularity: int | None, trust: int | None
     ) -> None:
         """
-        Sets the model used. If Logistic is set, populartiy and trust
+        Sets the model used. If Logistic is set, popularity and trust
         parameters are set as well.
         """
         self._model = model.lower()

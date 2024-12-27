@@ -60,7 +60,7 @@ class SortBy(QWidget):
         self.setLayout(layout)
 
     def get_selections(self) -> dict[str, str]:
-        """Returns the current selctions"""
+        """Returns the current selections"""
         if (
             not self._primary_key.current_val
             or not self._secondary_key.current_val
@@ -148,7 +148,7 @@ class ModelOptions(QFrame):
         return self._model_options.current_val
 
     def get_coefficients(self) -> tuple[float, int]:
-        """Returns the currently set coefficents (trust, population)"""
+        """Returns the currently set coefficients (trust, population)"""
         trust = self._trust_slider.current_val
         min_popularity = self._min_popularity.current_val
         return trust, min_popularity
@@ -242,12 +242,15 @@ class Settings(QWidget):
 
     def _set_model(self) -> None:
         """Attempts to set the model if selected"""
+        # TODO: code smell - fix argument passing
         model = self._model_options.get_selection()
         if model == 'Logistic':
             trust, popularity = self._model_options.get_coefficients()
             self._data_root.set_ranking_model(model, popularity, trust)
+            self._data.calculate_stats()
         elif model:
             self._data_root.set_ranking_model(model)
+            self._data.calculate_stats()
 
     def _set_sort_keys(self) -> None:
         """Attempts to set the sorting keys if selected"""

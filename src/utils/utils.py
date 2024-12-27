@@ -21,7 +21,7 @@ def extract_json_data(file_name: str) -> Any:
     else:
         data = {}
     return data
-    
+
 
 def extract_data(file_name: str) -> Any:
     """Returns the contents of the file (csv or json)"""
@@ -34,7 +34,6 @@ def extract_data(file_name: str) -> Any:
         return extract_csv_data(file_name)
 
 
-
 def zip_csv_files(src: str, dest: str, delete_input_files: bool) -> None:
     """
     Merges the csv files in scr and saves them to dest. Can delete
@@ -42,12 +41,12 @@ def zip_csv_files(src: str, dest: str, delete_input_files: bool) -> None:
     a header).
     """
     input_files = os.listdir(src)
-    
+
     with open(dest, "w", newline="") as csv_file:
         csv_writer = csv.writer(csv_file)
 
         for file in input_files:
-            full_file_path = os.path.join(scr, file)
+            full_file_path = os.path.join(src, file)
             data = extract_data(full_file_path)
             csv_writer.writerows(data[1:])
             if delete_input_files:
@@ -55,17 +54,10 @@ def zip_csv_files(src: str, dest: str, delete_input_files: bool) -> None:
     return
 
 
-
 def save_json_data(file_name: str, data: dict) -> None:
     """Saves the provided data to a json file"""
 
     with open(file_name, "w") as file_obj:
         json.dump(data, file_obj)
-    
+
     return
-
-
-
-if __name__ == "__main__":
-    print(extract_data("../data_pipeline/num_reviews_dict.json"))
-

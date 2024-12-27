@@ -63,6 +63,10 @@ class GradeDropDown(DropDown):
         self.update_items(type(self)._grades[:end+1])
 
 
+class PitchesDropDown(DropDown):
+    pass
+
+
 class RouteFilter(QFrame):
     """
     TODO

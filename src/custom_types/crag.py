@@ -47,11 +47,6 @@ class RouteFilter:
         )
         return in_grade_range
 
-    def more_deets(self, route: Route):
-        print(f"Lower Limit Value: {self._lower_grade.value}")
-        print(f"Upper Limit Value: {self._upper_grade.value}")
-        print(f"Route's limit: {route.grade.value}")
-
 
 class Area(Node):
 
@@ -221,7 +216,7 @@ class Area(Node):
         }
 
     def increment_stats(self, child_stats: dict[str, int]) -> None:
-        """Increments stats based on childrent stats"""
+        """Increments stats based on the children's stats"""
         self._matching_routes += child_stats.get("matching_routes", 0)
         self._popularity += child_stats.get("popularity", 0)
         self._rating += child_stats.get("rating", 0)

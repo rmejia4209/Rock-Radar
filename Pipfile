@@ -10,6 +10,7 @@ python-dotenv = "*"
 numpy = "*"
 pyqt5 = "*"
 pyqtdarktheme = "*"
+pyqtchart = "*"
 
 [dev-packages]
 

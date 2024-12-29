@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 from PyQt5.QtCore import pyqtSignal  # , Qt
 from UI.sidebar import Sidebar
 from UI.views import NumberOfRoutes
-from UI.route_filter import RouteFilter
+from UI.route_filter import RouteFilterWidget
 from custom_types.node import Node
 # TODO: add data def & management here
 # TODO: add signal/slot to update node changes
@@ -20,7 +20,7 @@ class Home(QWidget):
         self._data = data_root
         self._side_bar = Sidebar(data_root, parent=self)
         self._area_stats = NumberOfRoutes(data_root, parent=self)
-        self._route_filter = RouteFilter(self._data.route_filter, parent=self)
+        self._route_filter = RouteFilterWidget(self._data.route_filter, parent=self)
         self._connect_widgets()
         self._set_style()
         return

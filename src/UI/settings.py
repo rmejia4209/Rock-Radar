@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import (
-    QWidget, QPushButton, QFrame, QVBoxLayout, QHBoxLayout, QLineEdit
+    QWidget, QPushButton, QFrame, QVBoxLayout, QHBoxLayout
 )
 
-from UI.custom_widgets.labels import TitleLabel, HeaderLabel
+from UI.custom_widgets.labels import HeaderLabel
 from UI.custom_widgets.inputs import (
     DropDown, RadioButtons, Slider, NumLineEdit
 )
@@ -210,7 +210,6 @@ class Settings(QWidget):
         self._apply = QPushButton("Apply")
         self._connect_widgets()
         self._set_style()
-        print("Released")
 
     @property
     def title(self):

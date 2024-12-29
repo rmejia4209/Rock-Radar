@@ -2,11 +2,11 @@
 from PyQt5.QtGui import QIntValidator  # QFont
 from PyQt5.QtWidgets import (
     QWidget, QFrame, QComboBox, QRadioButton, QVBoxLayout, QHBoxLayout,
-    QSlider, QLineEdit
+    QSlider, QLineEdit, QCheckBox
 )
 from PyQt5.QtCore import Qt, pyqtSignal
 
-from UI.custom_widgets.labels import SmallBoldLabel, SmallLabel
+from UI.custom_widgets.labels import SmallLabel
 
 
 class _BaseDropDown(QComboBox):
@@ -132,7 +132,8 @@ class RadioButtons(QFrame):
     _options: list[QRadioButton]
 
     def __init__(
-        self, options, *, orient_horizontally: bool = False, parent: QWidget
+        self, options: str, *, orient_horizontally: bool = False,
+        parent: QWidget
     ) -> None:
         """TODO"""
         super().__init__(parent=parent)
@@ -142,7 +143,7 @@ class RadioButtons(QFrame):
 
     def _create_radio_buttons(self, options) -> None:
         """TODO:
-        creats radio buttons and connects them
+        creates radio buttons and connects them
         """
         self._options = []
         for option in options:
@@ -176,7 +177,7 @@ class BaseSlider(QSlider):
 
     @staticmethod
     def _calculate_resolution(min_val):
-        """Calculates the resultion"""
+        """Calculates the resolution"""
         if isinstance(min_val, int):
             return 1
         return 10 * len(str(min_val).split('.')[1])
@@ -237,17 +238,20 @@ class BaseNumLineEdit(QLineEdit):
         super().__init__(parent=parent)
         self.setPlaceholderText(example_txt)
         self.setValidator(QIntValidator(min_val, max_val))
+        return
 
     @property
-    def current_val(self) -> int:
+    def current_val(self) -> int | None:
         """Returns the current value"""
-        return int(self.text())
+        if self.text():
+            return int(self.text())
+        return
 
 
 class NumLineEdit(QFrame):
     """TODO"""
     def __init__(
-        self, label: str, example_txt: str, min_val: str, max_val: int, 
+        self, label: str, example_txt: str, min_val: str, max_val: int,
         *, parent: QWidget
     ) -> None:
         super().__init__(parent=parent)
@@ -269,3 +273,41 @@ class NumLineEdit(QFrame):
     def current_val(self) -> int:
         """Returns the current value"""
         return self._num_input.current_val
+
+
+class Checkboxes(QFrame):
+    def __init__(
+        self, options: list[str], *, orient_horizontally: bool = True,
+        checkall: bool = False, parent: QWidget
+    ) -> None:
+        super().__init__(parent=parent)
+        self._create_checkboxes(options)
+        self._set_style(orient_horizontally)
+        if checkall:
+            self.select_all()
+
+    def _create_checkboxes(self, options: list[str]) -> None:
+        """Creates the checkboxes based on the options"""
+        self._options = []
+        for option in options:
+            self._options.append(QCheckBox(option))
+        return
+
+    def _set_style(self, orient_horizontally: bool) -> None:
+        """Sets the layout of the checkboxes"""
+        layout = QHBoxLayout() if orient_horizontally else QVBoxLayout()
+        for option in self._options:
+            layout.addWidget(option)
+        self.setLayout(layout)
+
+    def select_all(self) -> None:
+        """Sets the checked state of all options to true"""
+        for option in self._options:
+            option.setChecked(True)
+
+    @property
+    def curret_vals(self) -> list[str]:
+        """Returns the currently selected values"""
+        return [
+            option.text() for option in self._options if option.isChecked()
+        ]

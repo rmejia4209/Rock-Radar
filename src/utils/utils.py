@@ -56,8 +56,6 @@ def zip_csv_files(src: str, dest: str, delete_input_files: bool) -> None:
 
 def save_json_data(file_name: str, data: dict) -> None:
     """Saves the provided data to a json file"""
-
     with open(file_name, "w") as file_obj:
         json.dump(data, file_obj)
-
     return

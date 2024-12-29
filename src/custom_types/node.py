@@ -166,7 +166,7 @@ class Node:
                 getattr(
                     self,
                     type(self)._primary_leaf_key,
-                    bandaid[type(self)._primary_leaf_key]
+                    bandaid.get(type(self)._primary_leaf_key)
                 ),
                 str
             )

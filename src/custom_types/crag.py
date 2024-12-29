@@ -1,23 +1,29 @@
 from __future__ import annotations
-# from functools import total_ordering
 from custom_types.node import Node
 from custom_types.grade import Grade
 from custom_types.ranking_model import RankingModel
 
 
-class RouteFilter:
+class RouteFilterWidget:
+    """.DS_Store"""
+
     _lower_grade: Grade
     _upper_grade: Grade
+    _min_len: int
+    _min_num_pitches: int
+    _route_types = {'Trad': 'Trad', 'Sport': 'Sport', 'Top Rope': 'TR'}
 
     def __init__(self):
         self._lower_grade = Grade("5.0")
         self._upper_grade = Grade("5.15")
+        self._min_len = 0
+        self._min_num_pitches = 0
+        self._selected_route_types = list(type(self)._route_types.values())
 
-    def __str__(self):
-        txt = "Current Filter\n"
-        txt += f"\tMinimum Grade: {self._lower_grade}\n"
-        txt += f"\tMaximum Grade: {self._upper_grade}\n"
-        return txt
+    @property
+    def available_route_types(self) -> list[str]:
+        """Returns the available route types"""
+        return list(type(self)._route_types.keys())
 
     @property
     def lower_grade(self) -> Grade:
@@ -39,13 +45,38 @@ class RouteFilter:
         """Setter function for setting the upper grade bound"""
         self._upper_grade = grade if isinstance(grade, Grade) else Grade(grade)
 
+    def set_min_num_pitches(self, val: int) -> None:
+        """Sets the minimum number of pitches for the filter"""
+        self._min_num_pitches = val
+
+    def set_min_length(self, val: int) -> None:
+        """Sets the minimum number of pitches for the filter"""
+        self._min_len = val
+
+    def set_route_types(self, route_types: list[str]) -> None:
+        """Sets the selected route types based on the provided argument"""
+        self._selected_route_types.clear()
+        self._selected_route_types = [
+            type(self)._route_types[val] for val in route_types
+        ]
+
     def is_match(self, route: Route) -> bool:
-        """TODO"""
-        # Check 1: Is the route's grade within the min and max grades?
-        in_grade_range = route.grade.is_in_range(
-            self._lower_grade, self._upper_grade
+        """
+        Returns true if the route is a match based on the currently set
+        criteria
+        """
+        if route.num_pitches < self._min_num_pitches:
+            return False
+
+        if route.length < self._min_len:
+            return False
+
+        if not route.grade.is_in_range(self._lower_grade, self._upper_grade):
+            return False
+
+        return any(
+            rt in self._selected_route_types for rt in route.route_types
         )
-        return in_grade_range
 
 
 class Area(Node):
@@ -64,7 +95,7 @@ class Area(Node):
     _avg_rating: float
     _avg_score: float
 
-    _route_filter: RouteFilter = RouteFilter()
+    _route_filter: RouteFilterWidget = RouteFilterWidget()
     _ranking_model: RankingModel = RankingModel()
     _node_attributes: dict[str, str] = {
         "name": "_name",
@@ -121,7 +152,7 @@ class Area(Node):
             self._coordinates = coordinates
 
     @property
-    def route_filter(self) -> RouteFilter:
+    def route_filter(self) -> RouteFilterWidget:
         """Returns the class filter attribute"""
         return type(self)._route_filter
 
@@ -315,6 +346,21 @@ class Route(Node):
         """Returns the rating of the route"""
         return round(self._rating, 2)
 
+    @property
+    def length(self) -> int:
+        """Returns the length of the route"""
+        return self._length
+
+    @property
+    def num_pitches(self) -> int:
+        """Returns the routes number of pitches"""
+        return self._num_pitches
+
+    @property
+    def route_types(self) -> list[str]:
+        """Returns the route's types"""
+        return self._route_types
+
     def _set_stats(self, stats: dict[str, int | float]) -> None:
         """Sets the route's stats"""
         self._stats = stats
@@ -324,7 +370,7 @@ class Route(Node):
         return self._stats
 
     def calculate_stats(
-        self, route_filter: RouteFilter, ranking_model: RankingModel
+        self, route_filter: RouteFilterWidget, ranking_model: RankingModel
     ) -> dict[str, int | float]:
         """
         Calculates the route's stats if it meets the filter requirements

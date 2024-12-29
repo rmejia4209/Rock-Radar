@@ -148,6 +148,10 @@ class ScrollableLinkList(QScrollArea):
         self._links.move_up()
         return
 
+    def refresh(self, node: Node) -> None:
+        """Refreshes the widget"""
+        self._links.update_links(node, emit=False)
+
 
 class DualIcon(QWidget):
     """TODO: write docstring"""

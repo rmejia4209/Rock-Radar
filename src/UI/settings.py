@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
     QWidget, QPushButton, QFrame, QVBoxLayout, QHBoxLayout
 )
-
+from PyQt5.QtCore import pyqtSignal
 from UI.custom_widgets.labels import HeaderLabel
 from UI.custom_widgets.inputs import (
     DropDown, RadioButtons, Slider, NumLineEdit
@@ -187,7 +187,11 @@ class MetricSelection(QFrame):
 
 
 class Settings(QWidget):
-    """.DS_Store"""
+    """
+    TODO
+    """
+    settings_changed = pyqtSignal()
+
     def __init__(self, data_root: Area, *, parent: QWidget):
         super().__init__(parent=parent)
         self._data_root = data_root
@@ -250,13 +254,14 @@ class Settings(QWidget):
         elif model:
             self._data_root.set_ranking_model(model)
             self._data.calculate_stats()
+        return
 
     def _set_sort_keys(self) -> None:
         """Attempts to set the sorting keys if selected"""
         sort_keys = self._sort_settings.get_selections()
         if sort_keys:
             self._data_root.set_sort_keys(sort_keys)
-            self._data_root.sort()
+        return
 
     def _set_display_metrics(self) -> None:
         """Attempts to set the display metrics"""
@@ -265,9 +270,13 @@ class Settings(QWidget):
             self._data_root.set_area_metric(area_metric)
         if crag_metric:
             self._data_root.set_crag_metric(crag_metric)
+        return
 
     def apply_sort_settings(self) -> None:
         """Applies the current selections to the sort settings"""
         self._set_model()
         self._set_display_metrics()
         self._set_sort_keys()
+        # TODO: code smell
+        # Tree nodes are resorted regardless if changes are made
+        self.settings_changed.emit()

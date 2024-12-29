@@ -13,6 +13,10 @@ class MainWindow(QMainWindow):
     """
     TODO: write doc string
     """
+    _data: Node
+    _navbar: NavBar
+    _home: Home
+    _settings: Settings
 
     def __init__(self, data_root: Node) -> None:
         """TODO: write doc string"""
@@ -29,10 +33,13 @@ class MainWindow(QMainWindow):
         return
 
     def _connect_widgets(self) -> None:
+        """Connects the signals of the widget's children to different slots"""
         self._navbar.page_changed.connect(lambda idx: self._change_page(idx))
+        self._settings.settings_changed.connect(self._home.refresh_data)
         self._home.node_changed.connect(
             lambda title: self._navbar.update_title(title)
         )
+        return
 
     def _change_page(self, idx) -> None:
         """Changes the current page in view"""

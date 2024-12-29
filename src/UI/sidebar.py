@@ -33,22 +33,10 @@ class Sidebar(QFrame):
     def _update_node(self, node: Node) -> None:
         self._current_node = node
         self._back_button.setToolTip(f"{self._current_node}")
-        # self._title.setText(f"{self._current_node}")
         self.level_changed.emit(self._current_node)
 
-    def move_down(self, node: Node) -> None:
-        self._back_button.show()
-        self._update_node(node)
-
-    def move_up(self) -> None:
-        if self._current_node.parent:
-            self._update_node(self._current_node.parent)
-            self._links.move_up()
-
-        if not self._current_node.parent:
-            self._back_button.hide()
-
     def _connect_widgets(self) -> None:
+        """Connects the signals of the widget's children to different slots"""
         self._links.level_changed.connect(lambda node: self.move_down(node))
         self._back_button.clicked.connect(self.move_up)
 
@@ -62,9 +50,28 @@ class Sidebar(QFrame):
 
     def _set_style(self) -> None:
         """Set up the main layout"""
-
         self._set_layout()
         self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
         self.setLineWidth(1)
         self._back_button.hide()
         return
+
+    def move_down(self, node: Node) -> None:
+        """Traverses down the tree"""
+        self._back_button.show()
+        self._update_node(node)
+        return
+
+    def move_up(self) -> None:
+        """Traverses up the tree"""
+        if self._current_node.parent:
+            self._update_node(self._current_node.parent)
+            self._links.move_up()
+
+        if not self._current_node.parent:
+            self._back_button.hide()
+        return
+
+    def refresh(self) -> None:
+        """Refreshes the current node"""
+        self._links.refresh(self._current_node)

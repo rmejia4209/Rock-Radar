@@ -78,7 +78,9 @@ class RouteFilterWidget(QFrame):
     _apply: QPushButton
     filter_updated = pyqtSignal()
 
-    def __init__(self, route_filter: RouteFilterWidget, parent: QWidget) -> None:
+    def __init__(
+        self, route_filter: RouteFilterWidget, parent: QWidget
+    ) -> None:
         super().__init__(parent=parent)
 
         self._route_filter = route_filter

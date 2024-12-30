@@ -105,10 +105,8 @@ class Node:
         keys.
 
         Args:
-            - primary_key (str): Primary key for internal node sorts
-            - secondary_key (str): Primary key for internal node sorts
-            - primary_leaf_key (str): Primary key for leaf parent sorts
-            - secondary_leaf_key (str): Primary key for leaf parent sorts
+            - node_sort_key (str): Primary key for sorting internal nodes
+            - leaf_sort_key (str): Primary key for sorting leaves
         """
         type(self)._node_sort_key = kwargs.get(
             "node_sort_key", type(self)._node_sort_key
@@ -141,8 +139,8 @@ class Node:
         """Sorts the children of a leaf parent node based on the set keys"""
         # TODO: code smell...
         bandaid = {'_length': 1, '_num_pitches': 1, '_grade': 'a'}
-        val = getattr(self, type(self)._primary_leaf_key, None)
-        val = bandaid.get(type(self)._primary_leaf_key) if val is None else val
+        val = getattr(self, type(self)._leaf_sort_key, None)
+        val = bandaid.get(type(self)._leaf_sort_key) if val is None else val
         reversed_order = not isinstance(val, str)
         self._children.sort(
             key=lambda node: getattr(node, type(self)._leaf_sort_key),

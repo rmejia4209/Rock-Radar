@@ -215,12 +215,9 @@ class Area(Node):
         self._route_filter.upper_grade = upper_grade
         # Recalculate stats here
 
-    def set_ranking_model(
-        self, model: str, popularity: int | None = None,
-        trust: int | None = None
-    ) -> None:
-        """Set the ranking model"""
-        type(self)._ranking_model.set_model(model, popularity, trust)
+    def set_ranking_model(self, model: str) -> None:
+        """Sets the ranking model"""
+        type(self)._ranking_model.set_model(model)
         return
 
     def calculate_total_num_routes(self) -> int:

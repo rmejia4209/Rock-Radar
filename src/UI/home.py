@@ -61,6 +61,8 @@ class Home(QWidget):
 
     def refresh_data(self) -> None:
         """Refreshes the data displayed"""
+        # TODO: code smell
+        # Sort & Caclulation done regardless of actual change
         self._data.calculate_stats()
         self._data.sort()
         node = self._side_bar.current_node

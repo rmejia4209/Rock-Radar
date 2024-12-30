@@ -4,7 +4,7 @@ import math
 class RankingModel:
     """TODO:"""
     _model: str
-    _options: list[str] = ['raw', 'logarithmic', 'logistic']
+    _options: list[str] = ['raw', 'logarithmic',]  # logistic removed
 
     def __init__(self, model: str = 'raw'):
         self._model = model
@@ -31,7 +31,10 @@ class RankingModel:
         return round(math.log(popularity+1)*rating, 2)
 
     def _logistic_score(self, popularity: int, rating: float) -> float:
-        """Returns a score based on a logistic function."""
+        """
+        Currently not used due to the complexity of the model.
+        Returns a score based on a logistic function.
+        """
         c = self._target_popularity / 2
         k = self._trust_parameter
         exponent = (-1 * k) * (popularity - c)
@@ -46,14 +49,9 @@ class RankingModel:
             return RankingModel._logarithmic_score(popularity, rating)
         return self._logistic_score(popularity, rating)
 
-    def set_model(
-        self, model: str, popularity: int | None, trust: int | None
-    ) -> None:
+    def set_model(self, model: str) -> None:
         """
         Sets the model used. If Logistic is set, popularity and trust
         parameters are set as well.
         """
         self._model = model.lower()
-        if self._model == 'logistic':
-            self._target_popularity = popularity if popularity else 25
-            self._trust_parameter = trust if trust else 0.25

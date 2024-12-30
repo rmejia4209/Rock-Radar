@@ -245,6 +245,7 @@ class Area(Node):
         self._popularity = 0
         self._rating = 0
         self._score = 0
+        self._route_types = {route_type: 0 for route_type in self._route_types}
 
     def get_stats(self) -> dict[str, int | float]:
         return {

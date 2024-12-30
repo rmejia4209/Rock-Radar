@@ -9,69 +9,6 @@ from UI.custom_widgets.inputs import (
 from custom_types.crag import Area
 
 
-class SortBy(QWidget):
-    """
-    TODO: doc string
-    """
-
-    def __init__(
-        self, sorting_options: list[str], obj: str, *, parent: QWidget
-    ) -> None:
-        super().__init__(parent=parent)
-        self._primary_key = DropDown(
-            sorting_options, f'Sort {obj} by', 'Please select', parent=self
-        )
-        self._secondary_key = DropDown(
-            sorting_options, 'then by', 'Please select', parent=self
-        )
-        self._connect_widgets()
-        self._set_style()
-
-    def _connect_widgets(self) -> None:
-        """
-        Connects the drop downs to update the selection in the
-        secondary/primary dropdown when a selection is made in the
-        primary/secondary dropdown.
-        """
-        self._primary_key.item_changed.connect(
-            lambda selected_option: self._clear_selection(
-                selected_option, self._secondary_key
-            )
-        )
-        self._secondary_key.item_changed.connect(
-            lambda selected_option: self._clear_selection(
-                selected_option, self._primary_key
-            )
-        )
-
-    def _clear_selection(self, option: str, dropdown: DropDown) -> None:
-        """
-        Resets the selection in dropdown if the dropdown's current value
-        is equal to the given option
-        """
-        if dropdown.current_val == option:
-            dropdown.reset()
-
-    def _set_style(self) -> None:
-        """Sets the layout of the widget"""
-        layout = QVBoxLayout()
-        for widget in [self._primary_key, self._secondary_key]:
-            layout.addWidget(widget)
-        self.setLayout(layout)
-
-    def get_selections(self) -> dict[str, str]:
-        """Returns the current selections"""
-        if (
-            not self._primary_key.current_val
-            or not self._secondary_key.current_val
-        ):
-            return {}
-        return {
-            'primary': self._primary_key.current_val,
-            'secondary': self._secondary_key.current_val
-        }
-
-
 class SortingSettings(QFrame):
     """
     TODO: doc string
@@ -83,32 +20,38 @@ class SortingSettings(QFrame):
     ) -> None:
         super().__init__(parent=parent)
         self._title = HeaderLabel('Sorting Settings', parent=self)
-        self._area_sorting = SortBy(area_options, 'crags', parent=self)
-        self._crag_sorting = SortBy(crag_options, 'routes', parent=self)
+        self._area_sorting = DropDown(
+            area_options, 'Sort crags by', 'Please select', parent=self
+        )
+        self._crag_sorting = DropDown(
+            crag_options, 'Sort routes by', 'Please select', parent=self
+        )
         self._set_style()
 
-    def _set_style(self) -> None:
-        """Sets the layout of the widget"""
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(self._title)
-        dropdowns = QHBoxLayout()
+    def _create_dropdown_layout(self) -> QHBoxLayout:
+        """Returns a horizontal layout with the dropdowns"""
+        layout = QHBoxLayout()
         for widget in [self._area_sorting, self._crag_sorting]:
-            dropdowns.addWidget(widget)
-        main_layout.addLayout(dropdowns)
-        self.setLayout(main_layout)
+            layout.addWidget(widget)
+        return layout
+
+    def _set_style(self) -> None:
+        """Sets the main layout and style of the widget"""
+        layout = QVBoxLayout()
+        layout.addWidget(self._title)
+        layout.addLayout(self._create_dropdown_layout())
+        self.setLayout(layout)
         self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
         self.setLineWidth(1)
 
     def get_selections(self) -> dict[str, str] | None:
-        area_options = self._area_sorting.get_selections()
-        crag_options = self._crag_sorting.get_selections()
+        """Returns the current sort key selections"""
+        area_option = self._area_sorting.current_val
+        crag_option = self._crag_sorting.current_val
 
-        if not area_options or not crag_options:
-            return {}
-        return {
-            "node": area_options,
-            "leaf": crag_options
-        }
+        if area_option and crag_option:
+            return {'node': area_option, 'leaf': crag_option}
+        return
 
 
 class ModelOptions(QFrame):

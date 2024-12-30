@@ -12,10 +12,8 @@ class Node:
     _is_leaf: bool
 
     # Class attributes
-    _primary_key: str = "name"
-    _secondary_key: str = "name"
-    _primary_leaf_key: str = "name"
-    _secondary_leaf_key: str = "name"
+    _node_sort_key: str = "name"
+    _leaf_sort_key: str = "name"
     _node_attributes: dict[str, str] = {}
     _leaf_attributes: dict[str, str] = {}
 
@@ -112,70 +110,43 @@ class Node:
             - primary_leaf_key (str): Primary key for leaf parent sorts
             - secondary_leaf_key (str): Primary key for leaf parent sorts
         """
-        type(self)._primary_key = kwargs.get(
-            "primary_key", type(self)._primary_key
+        type(self)._node_sort_key = kwargs.get(
+            "node_sort_key", type(self)._node_sort_key
         )
-        type(self)._secondary_key = kwargs.get(
-            "secondary_key", type(self)._secondary_key
+
+        type(self)._leaf_sort_key = kwargs.get(
+            "leaf_sort_key", type(self)._leaf_sort_key
         )
-        type(self)._primary_leaf_key = kwargs.get(
-            "primary_leaf_key", type(self)._primary_leaf_key
-        )
-        type(self)._secondary_leaf_key = kwargs.get(
-            "secondary_leaf_key", type(self)._secondary_leaf_key
-        )
+
         return
 
     def set_sort_keys(self, sort_keys: dict[str, str]) -> None:
         """Sets the sort keys based on the provided dictionary"""
-        node_p = type(self)._node_attributes[
-            sort_keys['node']['primary'].lower()
-        ]
-        node_s = type(self)._node_attributes[
-            sort_keys['node']['secondary'].lower()
-        ]
-        leaf_p = type(self)._leaf_attributes[
-            sort_keys['leaf']['primary'].lower()
-        ]
-        leaf_s = type(self)._leaf_attributes[
-            sort_keys['leaf']['secondary'].lower()
-        ]
-        self._set_sort_keys(
-            primary_key=node_p, secondary_key=node_s,
-            primary_leaf_key=leaf_p, secondary_leaf_key=leaf_s
-        )
+        node_key = type(self)._node_attributes[sort_keys['node'].lower()]
+        leaf_key = type(self)._leaf_attributes[sort_keys['leaf'].lower()]
+        self._set_sort_keys(node_sort_key=node_key, leaf_sort_key=leaf_key)
         return
 
     def _sort_internal_node(self) -> None:
         """Sorts an internal node's children based on the set keys"""
         reversed_order = (
-            not isinstance(getattr(self, type(self)._primary_key), str)
+            not isinstance(getattr(self, type(self)._node_sort_key), str)
         )
         self._children.sort(
-            key=lambda node: (
-                getattr(node, type(self)._primary_key),
-                getattr(node, type(self)._secondary_key)
-            ), reverse=reversed_order
+            key=lambda node: getattr(node, type(self)._node_sort_key),
+            reverse=reversed_order
         )
 
     def _sort_leaf_nodes(self) -> None:
         """Sorts the children of a leaf parent node based on the set keys"""
+        # TODO: code smell...
         bandaid = {'_length': 1, '_num_pitches': 1, '_grade': 'a'}
-        reversed_order = (
-            not isinstance(
-                getattr(
-                    self,
-                    type(self)._primary_leaf_key,
-                    bandaid.get(type(self)._primary_leaf_key)
-                ),
-                str
-            )
-        )
+        val = getattr(self, type(self)._primary_leaf_key, None)
+        val = bandaid.get(type(self)._primary_leaf_key) if val is None else val
+        reversed_order = not isinstance(val, str)
         self._children.sort(
-            key=lambda node: (
-                getattr(node, type(self)._primary_leaf_key),
-                getattr(node, type(self)._secondary_leaf_key)
-            ), reverse=reversed_order
+            key=lambda node: getattr(node, type(self)._leaf_sort_key),
+            reverse=reversed_order
         )
 
     def sort(self) -> None:

@@ -33,6 +33,10 @@ class Grade:
         """
         return self._grade
 
+    def __hash__(self) -> int:
+        """Returns the hash of the object"""
+        return hash(self._value)
+
     def __eq__(self, other: Grade) -> bool:
         """Returns true if the two grades are equivalent"""
         return self._value == other.value
@@ -67,6 +71,12 @@ class Grade:
             "5.15a", "5.15b", "5.15c", "5.15d"
         ]
         return sorted([Grade(grade) for grade in grade_strings])
+
+    @staticmethod
+    def init_grade_dict() -> dict[str, int]:
+        """Returns a grade dictionary with the 'main' grades as keys"""
+        grade_strings = ['5.6', '5.7', '5.8', '5.9', '5.10', '5.11', '5.12']
+        return {Grade(grade): 0 for grade in grade_strings}
 
     def _get_base_and_suffix(self) -> tuple[int, str]:
         """
@@ -121,8 +131,8 @@ class Grade:
         Returns true if the grade is greater than or equal to the min bound
         and less than or equal to the max bound. Returns false otherwise.
         """
-        # TODO: test edge cases
-        # TODO: bug here - 13b fails 13d filter
+        # TODO: test edge cases (????)
+        # TODO: bug here - 13b fails 13d filter (????)
         if min_bound <= self <= max_bound:
             return True
         elif self._loose_ge(min_bound) or self._loose_le(max_bound):

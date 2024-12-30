@@ -19,7 +19,7 @@ class CragStats(QFrame):
             parent=self
         )
         self._grade_frequence = BarGraph(
-           {'Python': 30, 'C++': 10, 'Javascript': 35}, 'Crag Grades', parent=self
+            node.grades, 'Crag Grades', parent=self
         )
 
         self._set_style()
@@ -44,3 +44,4 @@ class CragStats(QFrame):
     def update(self, node) -> None:
         self._matching_routes.update(node.num_matching_routes)
         self._route_types.update_data(node.route_types)
+        self._grade_frequence.update_data(node.grades)

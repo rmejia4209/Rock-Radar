@@ -1,3 +1,4 @@
+from typing import Any
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QFrame, QVBoxLayout
 from PyQt5.QtGui import QColor
@@ -60,7 +61,7 @@ class _BasePieChart(QChartView):
 
 class _BaseBarGraph(QChartView):
     """TODO"""
-    def __init__(self, data: dict[str, int], *, parent: QWidget):
+    def __init__(self, data: dict[Any, int], *, parent: QWidget):
         super().__init__(parent=parent)
         self._bar_graph = QBarSeries()
         self._bar_set = QBarSet('')
@@ -70,17 +71,17 @@ class _BaseBarGraph(QChartView):
         self._add_data_to_bar_graph(data)
         self._set_style(data)
 
-    def _add_data_to_bar_graph(self, data: dict[str, int]) -> None:
+    def _add_data_to_bar_graph(self, data: dict[Any, int]) -> None:
         """Adds data to the pie chart"""
         self._bar_set.append([data[key] for key in sorted(data)])
         self._bar_set.setColor(QColor(54, 162, 235))
         self._bar_graph.append(self._bar_set)
         return
 
-    def _format_axes(self, data: dict[str, int]) -> None:
+    def _format_axes(self, data: dict[Any, int]) -> None:
         """Formats the x and y axes of the graph"""
         # Set axes' values
-        self._x_axis.append(sorted(data))
+        self._x_axis.append([str(val) for val in sorted(data)])
         self._y_axis.setRange(0, max(data.values())+2)
         self._y_axis.setLabelFormat("%.0f")
 
@@ -91,7 +92,7 @@ class _BaseBarGraph(QChartView):
         self._bar_graph.attachAxis(self._x_axis)
         return
 
-    def _style_chart(self, data: dict[str, int]) -> None:
+    def _style_chart(self, data: dict[Any, int]) -> None:
         """Styles the chart"""
         # Add the pie chart to the chart and set animation
         self._chart.addSeries(self._bar_graph)
@@ -100,13 +101,13 @@ class _BaseBarGraph(QChartView):
         self._chart.legend().setVisible(False)
         return
 
-    def _set_style(self, data: dict[str, int]) -> None:
+    def _set_style(self, data: dict[Any, int]) -> None:
         """Set the style of the chart view"""
         self._style_chart(data)
         self.setChart(self._chart)
         self.setRenderHint(QPainter.Antialiasing)
 
-    def update_data(self, data: dict[str, int]) -> None:
+    def update_data(self, data: dict[Any, int]) -> None:
         """Updates the pie charts current values"""
         self._y_axis.setRange(0, max(data.values())+2)
         for idx, key in enumerate(sorted(data)):
@@ -171,7 +172,7 @@ class PieChart(_BaseChart):
 class BarGraph(_BaseChart):
     """TODO"""
     def __init__(
-        self, data: dict[str, int], label: str, *, parent: QWidget
+        self, data: dict[Any, int], label: str, *, parent: QWidget
     ) -> None:
         """TODO"""
         super().__init__('bar', data, label, parent=parent)

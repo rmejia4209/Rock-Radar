@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections import Counter
 from custom_types.node import Node
 from custom_types.grade import Grade
 from custom_types.ranking_model import RankingModel
@@ -138,6 +139,7 @@ class Area(Node):
         self._avg_score = 0
         route_types = Area._route_filter.available_route_types
         self._route_types = {route_type: 0 for route_type in route_types}
+        self._grades = Grade.init_grade_dict()
 
     def __str__(self):
         metric = getattr(self, Area._metric)
@@ -176,13 +178,13 @@ class Area(Node):
         return self._route_types
 
     @property
+    def grades(self) -> dict[Grade, int]:
+        return self._grades
+
+    @property
     def models(self) -> list[str]:
         """Returns the available ranking model options"""
         return type(self)._ranking_model.get_options()
-
-    @property
-    def logistic_coefficient_limits(self) -> tuple[int, int]:
-        return type(self)._ranking_model.get_logistic_coefficient_limits()
 
     def get_area_metrics(self) -> list[str]:
         """
@@ -220,22 +222,37 @@ class Area(Node):
         type(self)._ranking_model.set_model(model)
         return
 
-    def calculate_total_num_routes(self) -> int:
+    def calculate_area_stats(self) -> int:
         """Calculates the total number of routes in an area"""
         # Base case - children are routes
+
         if self.is_leaf_parent:
             self._total_routes = len(self._children)
+            for route in self._children:
+                if Grade(f'5.{route.grade.base}') in self._grades:
+                    self._grades[Grade(f'5.{route.grade.base}')] += 1
+
+                for route_type in self._route_types.keys():
+                    if route_type in route.route_types:
+                        self._route_types[route_type] += 1
 
         # Recursive case - children are areas
         else:
             self._total_routes = 0
             for area in self._children:
-                area.calculate_total_num_routes()
+                area.calculate_area_stats()
                 self._total_routes += area.total_num_routes
+                self._grades = dict(
+                    Counter(self._grades) + Counter(area.grades)
+                )
+
+                self._route_types = dict(
+                    Counter(self._route_types) + Counter(area.route_types)
+                )
         return
 
     def init_stats(self) -> None:
-        self.calculate_total_num_routes()
+        self.calculate_area_stats()
         self.calculate_stats()
         return
 
@@ -245,7 +262,6 @@ class Area(Node):
         self._popularity = 0
         self._rating = 0
         self._score = 0
-        self._route_types = {route_type: 0 for route_type in self._route_types}
 
     def get_stats(self) -> dict[str, int | float]:
         return {
@@ -253,9 +269,6 @@ class Area(Node):
             "popularity": self._popularity,
             "rating": self._rating,
             "score": self._score,
-            'Trad': self._route_types['Trad'],
-            'Sport': self._route_types['Sport'],
-            'Top Rope': self._route_types['Top Rope']
         }
 
     def increment_stats(self, child_stats: dict[str, int]) -> None:
@@ -264,9 +277,6 @@ class Area(Node):
         self._popularity += child_stats.get("popularity", 0)
         self._rating += child_stats.get("rating", 0)
         self._score += child_stats.get("score", 0)
-        self._route_types['Trad'] += child_stats.get("Trad", 0)
-        self._route_types['Sport'] += child_stats.get("Sport", 0)
-        self._route_types['Top Rope'] += child_stats.get("Top Rope", 0)
 
     def calculate_averages(self) -> None:
         """Calculates the averaged stats"""
@@ -399,13 +409,6 @@ class Route(Node):
                 'popularity': self._popularity,
                 'rating': self._rating,
                 'score': self._score,
-                'Trad': 1 if 'Trad' in self._route_types else 0,
-                'Sport': 1 if 'Sport' in self._route_types else 0,
-                'Top Rope': 1 if 'TR' in self._route_types else 0
             })
         else:
-            self._set_stats({
-                'Trad': 1 if 'Trad' in self._route_types else 0,
-                'Sport': 1 if 'Sport' in self._route_types else 0,
-                'Top Rope': 1 if 'TR' in self._route_types else 0
-            })
+            self._set_stats({})

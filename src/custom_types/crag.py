@@ -3,6 +3,10 @@ from custom_types.node import Node
 from custom_types.grade import Grade
 from custom_types.ranking_model import RankingModel
 
+# TODO code smells
+# Normalize data to eliminate TR and Top Rope
+# Area/Route stat passing (i.e., route types & grades)
+
 
 class RouteFilterWidget:
     """.DS_Store"""
@@ -90,10 +94,11 @@ class Area(Node):
     _matching_routes: int
     _popularity: int
     _rating: float
-    __score: float
+    _score: float
     _avg_popularity: float
     _avg_rating: float
     _avg_score: float
+    _route_types: dict[str, int]
 
     _route_filter: RouteFilterWidget = RouteFilterWidget()
     _ranking_model: RankingModel = RankingModel()
@@ -131,6 +136,8 @@ class Area(Node):
         self._avg_popularity = 0
         self._avg_rating = 0
         self._avg_score = 0
+        route_types = Area._route_filter.available_route_types
+        self._route_types = {route_type: 0 for route_type in route_types}
 
     def __str__(self):
         metric = getattr(self, Area._metric)
@@ -163,6 +170,10 @@ class Area(Node):
     @property
     def num_matching_routes(self) -> int:
         return self._matching_routes
+
+    @property
+    def route_types(self) -> dict[str, int]:
+        return self._route_types
 
     @property
     def models(self) -> list[str]:
@@ -243,7 +254,10 @@ class Area(Node):
             "matching_routes": self._matching_routes,
             "popularity": self._popularity,
             "rating": self._rating,
-            "score": self._score
+            "score": self._score,
+            'Trad': self._route_types['Trad'],
+            'Sport': self._route_types['Sport'],
+            'Top Rope': self._route_types['Top Rope']
         }
 
     def increment_stats(self, child_stats: dict[str, int]) -> None:
@@ -252,6 +266,9 @@ class Area(Node):
         self._popularity += child_stats.get("popularity", 0)
         self._rating += child_stats.get("rating", 0)
         self._score += child_stats.get("score", 0)
+        self._route_types['Trad'] += child_stats.get("Trad", 0)
+        self._route_types['Sport'] += child_stats.get("Sport", 0)
+        self._route_types['Top Rope'] += child_stats.get("Top Rope", 0)
 
     def calculate_averages(self) -> None:
         """Calculates the averaged stats"""
@@ -380,10 +397,17 @@ class Route(Node):
                 self._popularity, self._rating
             )
             self._set_stats({
-                "matching_routes": 1,
-                "popularity": self._popularity,
-                "rating": self._rating,
-                "score": self._score
+                'matching_routes': 1,
+                'popularity': self._popularity,
+                'rating': self._rating,
+                'score': self._score,
+                'Trad': 1 if 'Trad' in self._route_types else 0,
+                'Sport': 1 if 'Sport' in self._route_types else 0,
+                'Top Rope': 1 if 'TR' in self._route_types else 0
             })
         else:
-            self._set_stats({})
+            self._set_stats({
+                'Trad': 1 if 'Trad' in self._route_types else 0,
+                'Sport': 1 if 'Sport' in self._route_types else 0,
+                'Top Rope': 1 if 'TR' in self._route_types else 0
+            })

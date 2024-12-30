@@ -10,7 +10,7 @@ class CragStats(QFrame):
         super().__init__(parent=parent)
 
         self._route_types = PieChart(
-            {'Python': 30, 'C++': 10, 'Javascript': 45}, "Route Types", parent=self
+            node.route_types, "Route Types", parent=self
         )
 
         self._matching_routes = SingleStatDisplay(
@@ -29,3 +29,4 @@ class CragStats(QFrame):
 
     def update(self, node) -> None:
         self._matching_routes.update(node.num_matching_routes)
+        self._route_types.update_data(node.route_types)

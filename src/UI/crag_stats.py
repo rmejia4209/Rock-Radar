@@ -10,7 +10,7 @@ class CragStats(QFrame):
         super().__init__(parent=parent)
 
         self._route_types = PieChart(
-            {'Python': 30, 'C++': 10, 'Javascript': 45}, parent=self
+            {'Python': 30, 'C++': 10, 'Javascript': 45}, "Route Types", parent=self
         )
 
         self._matching_routes = SingleStatDisplay(
@@ -18,7 +18,6 @@ class CragStats(QFrame):
             label="Number of Matching Routes",
             parent=self
         )
-
 
         self._set_style()
 

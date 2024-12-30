@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 from PyQt5.QtCore import pyqtSignal
 from UI.sidebar import Sidebar
-from UI.views import NumberOfRoutes
+from UI.crag_stats import CragStats
 from UI.route_filter import RouteFilterWidget
 from custom_types.node import Node
 
@@ -19,7 +19,7 @@ class Home(QWidget):
         super().__init__(parent=parent)
         self._data = data_root
         self._side_bar = Sidebar(data_root, parent=self)
-        self._area_stats = NumberOfRoutes(data_root, parent=self)
+        self._area_stats = CragStats(data_root, parent=self)
         self._route_filter = RouteFilterWidget(
             self._data.route_filter, parent=self
         )

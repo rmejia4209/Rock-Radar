@@ -42,7 +42,7 @@ class SingleStatDisplay(QFrame):
     def _set_style(self) -> None:
         """Set's the layout of the widget and adds a border"""
         self.setLayout(self._create_layout())
-        # TODO: investigate?
+        # TODO: fix UI later
         self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
         self.setLineWidth(1)
 

@@ -159,40 +159,13 @@ class _BaseChart(QFrame):
         self._graph.update_data(data)
 
 
-class PieChart(QFrame):
+class PieChart(_BaseChart):
     """TODO"""
-    # TODO: UI Issues
-    # - Label and chart are not centered
-    # - Chart background is white, not off white
     def __init__(
         self, data: dict[str, int], label: str, *, parent: QWidget
     ) -> None:
         """TODO"""
-        super().__init__(parent=parent)
-        self._pie_chart = _BasePieChart(data, parent=self)
-        self._label = SmallBoldLabel(label, parent=self)
-        self._set_style()
-
-    def _create_layout(self) -> QVBoxLayout:
-        """
-        Returns a vertical layout object with the widget's attributes added
-        and centered
-        """
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignCenter)
-        for widget in [self._pie_chart, self._label]:
-            layout.addWidget(widget)
-        return layout
-
-    def _set_style(self) -> None:
-        """Sets the style of the widget"""
-        self.setLayout(self._create_layout())
-        self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
-        self.setLineWidth(1)
-
-    def update_data(self, data: dict[str, int]) -> None:
-        """Updates the data of the pie chart"""
-        self._pie_chart.update_data(data)
+        super().__init__('pie', data, label, parent=parent)
 
 
 class BarGraph(_BaseChart):

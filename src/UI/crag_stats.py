@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import (QWidget, QFrame, QHBoxLayout)
-from UI.custom_widgets.charts import PieChart
+from PyQt5.QtWidgets import (QWidget, QFrame, QHBoxLayout, QVBoxLayout)
+from UI.custom_widgets.charts import PieChart, BarGraph
 from UI.custom_widgets.composites import SingleStatDisplay
 from custom_types.crag import Area
 
@@ -18,14 +18,28 @@ class CragStats(QFrame):
             label="Number of Matching Routes",
             parent=self
         )
+        self._grade_frequence = BarGraph(
+           {'Python': 30, 'C++': 10, 'Javascript': 35}, 'Crag Grades', parent=self
+        )
 
         self._set_style()
 
-    def _set_style(self):
+    def _create_top_row(self) -> QHBoxLayout:
+        """Returns a horizontal layout"""
         layout = QHBoxLayout()
         for widget in [self._matching_routes, self._route_types]:
             layout.addWidget(widget)
-        self.setLayout(layout)
+        return layout
+
+    def _create_main_layout(self) -> QVBoxLayout:
+        """Returns the main layout"""
+        layout = QVBoxLayout()
+        layout.addLayout(self._create_top_row())
+        layout.addWidget(self._grade_frequence)
+        return layout
+
+    def _set_style(self):
+        self.setLayout(self._create_main_layout())
 
     def update(self, node) -> None:
         self._matching_routes.update(node.num_matching_routes)

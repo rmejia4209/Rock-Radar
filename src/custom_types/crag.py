@@ -16,39 +16,43 @@ class RouteFilterWidget:
     _upper_grade: Grade
     _min_len: int
     _min_num_pitches: int
-    _route_types = {'Trad': 'Trad', 'Sport': 'Sport', 'Top Rope': 'TR'}
 
     def __init__(self):
         self._lower_grade = Grade("5.0")
         self._upper_grade = Grade("5.15")
         self._min_len = 0
         self._min_num_pitches = 0
-        self._selected_route_types = list(type(self)._route_types.values())
-
-    @property
-    def available_route_types(self) -> list[str]:
-        """Returns the available route types"""
-        return list(type(self)._route_types.keys())
+        self._selected_route_types = ['Trad', 'Sport', 'Top Rope']
 
     @property
     def lower_grade(self) -> Grade:
         """Returns the lower grade bound"""
         return self._lower_grade
 
-    @property
-    def upper_grade(self) -> Grade:
-        """Returns the upper grade bound"""
-        return self._upper_grade
-
     @lower_grade.setter
     def lower_grade(self, grade: Grade | str) -> None:
         """Setter function for setting the lower grade bound"""
         self._lower_grade = grade if isinstance(grade, Grade) else Grade(grade)
 
+    @property
+    def upper_grade(self) -> Grade:
+        """Returns the upper grade bound"""
+        return self._upper_grade
+
     @upper_grade.setter
     def upper_grade(self, grade: Grade | str) -> None:
         """Setter function for setting the upper grade bound"""
         self._upper_grade = grade if isinstance(grade, Grade) else Grade(grade)
+
+    @property
+    def route_types(self) -> list[str]:
+        """Returns the available route types"""
+        return self._selected_route_types
+
+    @route_types.setter
+    def route_types(self, route_types: list[str]) -> None:
+        """Sets the selected route types"""
+        self._selected_route_types = route_types[:]
 
     def set_min_num_pitches(self, val: int) -> None:
         """Sets the minimum number of pitches for the filter"""
@@ -57,13 +61,6 @@ class RouteFilterWidget:
     def set_min_length(self, val: int) -> None:
         """Sets the minimum number of pitches for the filter"""
         self._min_len = val
-
-    def set_route_types(self, route_types: list[str]) -> None:
-        """Sets the selected route types based on the provided argument"""
-        self._selected_route_types.clear()
-        self._selected_route_types = [
-            type(self)._route_types[val] for val in route_types
-        ]
 
     def is_match(self, route: Route) -> bool:
         """
@@ -137,8 +134,9 @@ class Area(Node):
         self._avg_popularity = 0
         self._avg_rating = 0
         self._avg_score = 0
-        route_types = Area._route_filter.available_route_types
-        self._route_types = {route_type: 0 for route_type in route_types}
+        self._route_types = {
+            route_type: 0 for route_type in Area._route_filter.route_types
+        }
         self._grades = Grade.init_grade_dict()
 
     def __str__(self):
@@ -211,11 +209,6 @@ class Area(Node):
     def set_crag_metric(self, metric: str) -> None:
         """Sets the metric that is displayed"""
         Route._metric = type(self)._leaf_attributes.get(metric.lower())
-
-    def set_filter(self, lower_grade, upper_grade) -> None:
-        self._route_filter.lower_grade = lower_grade
-        self._route_filter.upper_grade = upper_grade
-        # Recalculate stats here
 
     def set_ranking_model(self, model: str) -> None:
         """Sets the ranking model"""

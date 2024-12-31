@@ -87,8 +87,8 @@ class RouteFilterWidget(QFrame):
         self._min_grade = GradeDropDown(label="Minimum Grade", parent=self)
         self._max_grade = GradeDropDown(label="Maximum Grade", parent=self)
         self._route_types = Checkboxes(
-            self._route_filter.available_route_types,
-            orient_horizontally=False, checkall=True, parent=self
+            self._route_filter.route_types, orient_horizontally=False,
+            checkall=True, parent=self
         )
         self._min_length = NumLineEdit(
             'Minimum Length (ft):', 'e.g., 100', 0, 30000, parent=self
@@ -160,5 +160,5 @@ class RouteFilterWidget(QFrame):
             min_num_pitches if min_num_pitches else 0
         )
 
-        self._route_filter.set_route_types(self._route_types.curret_vals)
+        self._route_filter.route_types = self._route_types.curret_vals
         self.filter_updated.emit()

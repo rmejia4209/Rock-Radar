@@ -76,7 +76,7 @@ class _BaseBarGraph(QChartView):
         self._bar_set.append([data[key] for key in sorted(data)])
         self._bar_set.setColor(QColor(255, 99, 132))
         self._bar_graph.append(self._bar_set)
-        self._bar_graph.setBarWidth(2)
+        self._bar_graph.setBarWidth(1)
         return
 
     def _format_axes(self, data: dict[Any, int]) -> None:

@@ -4,10 +4,6 @@ from custom_types.node import Node
 from custom_types.grade import Grade
 from custom_types.ranking_model import RankingModel
 
-# TODO code smells
-# Normalize data to eliminate TR and Top Rope
-# Area/Route stat passing (i.e., route types & grades)
-
 
 class RouteFilterWidget:
     """.DS_Store"""

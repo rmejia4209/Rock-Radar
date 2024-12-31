@@ -1,5 +1,4 @@
 from __future__ import annotations
-from collections import Counter
 from custom_types.node import Node
 from custom_types.grade import Grade
 from custom_types.ranking_model import RankingModel
@@ -214,7 +213,6 @@ class Area(Node):
     def calculate_area_stats(self) -> int:
         """Calculates the total number of routes in an area"""
         # Base case - children are routes
-
         if self.is_leaf_parent:
             self._total_routes = len(self._children)
             for route in self._children:
@@ -231,13 +229,15 @@ class Area(Node):
             for area in self._children:
                 area.calculate_area_stats()
                 self._total_routes += area.total_num_routes
-                self._grades = dict(
-                    Counter(self._grades) + Counter(area.grades)
-                )
-
-                self._route_types = dict(
-                    Counter(self._route_types) + Counter(area.route_types)
-                )
+                for grade in self._grades:
+                    self._grades[grade] = (
+                        self._grades[grade] + area.grades[grade]
+                    )
+                for route_types in self._route_types:
+                    self._route_types[route_types] = (
+                        self._route_types[route_types]
+                        + area.route_types[route_types]
+                    )
         return
 
     def init_stats(self) -> None:

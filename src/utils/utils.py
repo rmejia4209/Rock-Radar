@@ -59,3 +59,10 @@ def save_json_data(file_name: str, data: dict) -> None:
     with open(file_name, "w") as file_obj:
         json.dump(data, file_obj)
     return
+
+
+def string_to_int(s: str) -> int():
+    """
+    Returns an int from the given string. Commas and white spaces are removed
+    """
+    return int(s.replace(' ', '').replace(',', ''))

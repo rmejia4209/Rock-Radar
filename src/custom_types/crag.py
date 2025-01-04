@@ -298,7 +298,6 @@ class Area(Node):
 class Route(Node):
     _id: str
     _name: str
-    _url: str
     _grade: Grade
     _route_types: list[str]
     _num_pitches: int
@@ -311,12 +310,11 @@ class Route(Node):
 
     def __init__(
         self,
-        mp_id: str, name: str, url: str, grade: str, route_types: list[str],
+        mp_id: str, name: str, grade: str, route_types: list[str],
         num_pitches: int, length: int, rating: float, popularity: int
     ) -> None:
         super().__init__(name, is_leaf=True)
         self._id = mp_id
-        self._url = url
         self._grade = Grade(grade)
         self._route_types = route_types
         self._num_pitches = num_pitches

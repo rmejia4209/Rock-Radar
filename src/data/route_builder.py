@@ -1,8 +1,11 @@
 from __future__ import annotations
+from concurrent.futures import ThreadPoolExecutor
 import os
-from utils.utils import extract_data
+import threading
+import time
 from custom_types.crag import Route, Area
 from custom_types.custom_types import RouteDict
+from utils.utils import extract_data
 
 
 def find_existing_area(root: Area, area_name: str) -> Area | None:
@@ -73,7 +76,6 @@ def build_area_tree() -> Area:
 
     Returns:
         Area: the root node of the area tree
-
     """
     src = os.path.join(os.path.dirname(__file__), 'crags_by_area')
     root = Area('Rock Radar')
@@ -88,4 +90,85 @@ def build_area_tree() -> Area:
                 length, float(route["rating"]), int(route["num_reviewers"])
             )
             add_path(root, route['area'], new_route)
+    return root
+
+
+def build_subtree(fp: str) -> Area:
+    """
+    Builds an Area tree from the given source file path.
+
+    Args:
+        fp (str): file path of source data
+
+    Returns:
+        Area: the root node of the area tree
+    """
+
+    root = Area('')
+    data: RouteDict = extract_data(fp)
+    for route_id, route in data.items():
+        length = int(route["length"]) if route["length"] else 0
+        new_route = Route(
+            route_id, route["name"], route["grade"],
+            route["route_types"], int(route["num_pitches"]),
+            length, float(route["rating"]), int(route["num_reviewers"])
+        )
+        add_path(root, route['area'], new_route)
+    return root.children[0]
+
+
+def add_subtree_to_list(
+    countries: list[Area], region_fp: str, usa: Area, lock: threading.Lock
+) -> None:
+    """
+    Safely adds the regions subtree to the countries list or as a child
+    of the USA node.
+
+    Args:
+        countries (list[Area]): list of countries trees
+        region_fp (str): file path of region's source data
+        usa (Area): USA node to add states
+        lock (threading.Lock): thread lock to safely access the list/node
+    """
+    region = build_subtree(region_fp)
+
+    with lock:
+        if region.name == 'USA':
+            state = region.children[0]
+            state.parent = usa
+            usa.add_child(state)
+        else:
+            countries.append(region)
+    return
+
+
+def build_area_tree_threaded() -> Area:
+    """
+    Builds an Area tree from the source files. Uses threads to speed the
+    process up. Not recommend for less than TODO number of regions.
+
+    Returns:
+        Area: the root node of the area tree
+    """
+
+    root = Area('Rock Radar')
+    usa = Area('')
+    countries: list[Area] = []
+    lock = threading.Lock()
+    src_files = []
+    src = os.path.join(os.path.dirname(__file__), 'crags_by_area')
+    for file in os.listdir(src):
+        src_files.append(os.path.join(src, file))
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        for fp in src_files:
+            executor.submit(
+                add_subtree_to_list, countries, fp, usa, lock
+            )
+
+    countries.append(usa)
+    for country in countries:
+        root.add_child(country)
+        country.parent = root
+
     return root

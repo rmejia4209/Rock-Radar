@@ -41,6 +41,10 @@ class Node:
     def parent(self) -> Node:
         return self._parent
 
+    @parent.setter
+    def parent(self, parent) -> None:
+        self._parent = parent
+
     @property
     def children(self) -> list[Node]:
         if self._is_leaf:
@@ -100,7 +104,7 @@ class Node:
     def _set_sort_keys(self, **kwargs) -> None:
         """
         Sets the sorting keys for the entire tree. The sorting keys represent
-        attributes of the node and are passed via a lambda funciton. Accepted
+        attributes of the node and are passed via a lambda function. Accepted
         key word arguments are outlined below. Will not changed unspecified
         keys.
 

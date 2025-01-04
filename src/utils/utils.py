@@ -54,9 +54,33 @@ def zip_csv_files(src: str, dest: str, delete_input_files: bool) -> None:
     return
 
 
-def save_json_data(file_name: str, data: dict) -> None:
-    """Saves the provided data to a json file"""
-    with open(file_name, "w") as file_obj:
+def is_subpath(fp: str) -> bool:
+    """
+    Returns true if the given file path starts in the src directory
+
+    Args:
+        fp (str): the filepath to be checked
+
+    Returns:
+        bool: true if the given file path beings with the src file path
+    """
+    return fp.startswith(os.path.dirname(os.path.dirname(__file__)))
+
+
+def save_json_data(fp: str, data: Any) -> None:
+    """
+    Saves the provided data to a json file. If the given file path is
+    not within the project root, an error is raised. All required
+    directories are created if they do not exist.
+
+    Args:
+        fp (str): the filepath
+        data: the data to be saved in the json file
+    """
+    if not is_subpath(fp):
+        raise Exception("Attempting to save file outside of project root.")
+    os.makedirs(os.path.dirname(fp), exist_ok=True)
+    with open(fp, "w") as file_obj:
         json.dump(data, file_obj)
     return
 
@@ -64,5 +88,11 @@ def save_json_data(file_name: str, data: dict) -> None:
 def string_to_int(s: str) -> int():
     """
     Returns an int from the given string. Commas and white spaces are removed
+
+    Args:
+        s (str): string to be converted. May include spaces, and commas
+
+    Returns:
+        int: integer conversion of given string
     """
     return int(s.replace(' ', '').replace(',', ''))

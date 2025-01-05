@@ -2,7 +2,6 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 import os
 import threading
-import time
 from custom_types.crag import Route, Area
 from custom_types.custom_types import RouteDict
 from utils.utils import extract_data

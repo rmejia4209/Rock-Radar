@@ -1,4 +1,3 @@
-import os
 from typing import Any, Callable
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
@@ -27,8 +26,6 @@ class _StatusMessage(QFrame):
         layout = self._create_layout()
         layout.setContentsMargins(5, 5, 5, 5)
         layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        #layout.setFrameStyle(QFrame.Panel | QFrame.Raised)
-        #layout.setLineWidth(1)
         self.setLayout(layout)
 
     def set_label_name(self, name: str) -> None:

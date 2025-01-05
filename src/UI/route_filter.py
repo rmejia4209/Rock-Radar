@@ -160,5 +160,5 @@ class RouteFilterWidget(QFrame):
             min_num_pitches if min_num_pitches else 0
         )
 
-        self._route_filter.route_types = self._route_types.curret_vals
+        self._route_filter.route_types = self._route_types.current_vals
         self.filter_updated.emit()

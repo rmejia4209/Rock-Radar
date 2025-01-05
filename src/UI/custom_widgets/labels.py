@@ -1,4 +1,3 @@
-from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import QWidget, QLabel
 
@@ -81,5 +80,4 @@ class IconLabel(QLabel):
 
         icon = QIcon(icon_path)
         self.setPixmap(icon.pixmap(*size))
-        #self.setStyleSheet("border:none;")
         return

@@ -306,7 +306,7 @@ class Checkboxes(QFrame):
             option.setChecked(True)
 
     @property
-    def curret_vals(self) -> list[str]:
+    def current_vals(self) -> list[str]:
         """Returns the currently selected values"""
         return [
             option.text() for option in self._options if option.isChecked()

@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import (
     QWidget, QFrame, QVBoxLayout, QHBoxLayout, QScrollArea, QStackedLayout
 )
 from PyQt5.QtCore import pyqtSignal, Qt
-from UI.custom_widgets.buttons import Link, Icon
+from UI.custom_widgets.buttons import Link, IconButton
 from UI.custom_widgets.labels import RegularLabel, TitleLabel
 from custom_types.node import Node
 
@@ -161,7 +161,7 @@ class DualIcon(QWidget):
         self, file_paths: tuple[str, str], *, parent: QWidget
     ) -> None:
         super().__init__(parent=parent)
-        self._buttons = [Icon(fp, parent=self) for fp in file_paths]
+        self._buttons = [IconButton(fp, parent=self) for fp in file_paths]
         self._layout = QStackedLayout()
         self._set_style()
 

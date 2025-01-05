@@ -32,7 +32,7 @@ class Link(QPushButton):
         return
 
 
-class Icon(QPushButton):
+class IconButton(QPushButton):
     """QPushButton with QIcon as the button"""
     def __init__(
         self, icon_path: str, *, size: tuple[int, int] = (50, 50),

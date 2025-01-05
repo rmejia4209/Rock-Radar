@@ -1,4 +1,5 @@
-from PyQt5.QtGui import QFont
+from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import QWidget, QLabel
 
 
@@ -67,3 +68,18 @@ class RegularLabel(Label):
     """Label with a font size of 14pts"""
     def __init__(self, txt: str, parent: QWidget) -> None:
         super().__init__(txt, size=14, bold=False, parent=parent)
+
+
+class IconLabel(QLabel):
+    """TODO"""
+    def __init__(
+        self, icon_path: str, *, size: tuple[int, int] = (50, 50),
+        parent: QWidget | None = None
+    ) -> None:
+        """TODO"""
+        super().__init__(parent=parent)
+
+        icon = QIcon(icon_path)
+        self.setPixmap(icon.pixmap(*size))
+        #self.setStyleSheet("border:none;")
+        return

@@ -46,6 +46,10 @@ class SingleStatDisplay(QFrame):
         self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
         self.setLineWidth(1)
 
-    def update(self, val: int) -> None:
+    def update_val(self, val: int) -> None:
         """Updates the number displayed"""
         self._number.setText(str(val))
+
+    def update_label(self, text: str) -> None:
+        """Updates the label"""
+        self._label.update_text(text)

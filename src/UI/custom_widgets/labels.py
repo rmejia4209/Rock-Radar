@@ -32,6 +32,10 @@ class Label(QLabel):
         self.setFont(font)
         return
 
+    def update_text(self, text: str) -> None:
+        """Wrapper method to update the text"""
+        self.setText(text)
+
 
 class TitleLabel(Label):
     """Label with a bold font size of 24pts"""

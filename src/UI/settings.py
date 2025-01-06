@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import pyqtSignal
 from UI.custom_widgets.labels import HeaderLabel
 from UI.custom_widgets.inputs import DropDown, RadioButtons
+from UI.components.area_downloader import AreaDownloads
 from custom_types.crag import Area
 
 
@@ -125,6 +126,9 @@ class Settings(QWidget):
             parent=self
         )
         self._apply = QPushButton("Apply")
+
+        self.foo = AreaDownloads(parent=self)
+
         self._connect_widgets()
         self._set_style()
 
@@ -154,6 +158,7 @@ class Settings(QWidget):
             widget_layout.addLayout(layout)
         main_layout.addLayout(widget_layout)
         main_layout.addWidget(self._apply)
+        main_layout.addWidget(self.foo)
         self.setLayout(main_layout)
 
     def _set_model(self) -> None:

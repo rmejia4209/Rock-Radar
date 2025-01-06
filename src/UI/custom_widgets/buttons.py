@@ -9,7 +9,7 @@ class Link(QPushButton):
     A basic button without a border and underline text. Used to
     resemble a link.
     """
-    def __init__(self, text: str, *, tip: str, parent: QWidget) -> None:
+    def __init__(self, text: str, *, tip: str = None, parent: QWidget) -> None:
         """
         Initialize the widget.
         Args:
@@ -18,7 +18,8 @@ class Link(QPushButton):
             parent (QWidget): The parent of the widget
         """
         super().__init__(text=text, parent=parent)
-        self.setToolTip(tip)
+        if tip:
+            self.setToolTip(tip)
         self._set_style(tip)
         return
 

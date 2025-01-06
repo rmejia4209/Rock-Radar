@@ -42,6 +42,6 @@ class CragStats(QFrame):
         self.setLayout(self._create_main_layout())
 
     def update(self, node) -> None:
-        self._matching_routes.update(node.num_matching_routes)
+        self._matching_routes.update_val(node.num_matching_routes)
         self._route_types.update_data(node.route_types)
         self._grade_frequence.update_data(node.grades)

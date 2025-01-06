@@ -106,8 +106,9 @@ class Worker(QThread):
         If an error is encountered, the error is emitted via the error signal.
         A success signal is emitted on completion.
         """
+        nums = list(range(0, 30))
         try:
-            for progress in self._func(*self._args):
+            for progress in self._func(*nums):  # self._func(*self._args):
                 self.progress.emit(progress)
             self.success.emit()
         except Exception as e:
@@ -145,9 +146,15 @@ class ProgressBar(QWidget):
         self._worker.set_args(*args)
         self._worker.start()
         return
+    
+    def is_running(self) -> bool:
+        """Returns true if the worker is still running"""
+        return self._worker.isRunning()
 
 
 class ButtonWithProgressBar(QWidget):
+
+    finished = pyqtSignal()
 
     def __init__(
         self, label: str, func: Callable[..., Any], *, error_icon_path: str,
@@ -197,10 +204,11 @@ class ButtonWithProgressBar(QWidget):
         """Displays the success label box and hides the progress bar."""
         self._progress_bar.hide()
         self._success_msg.show()
+        self.finished.emit()
 
     def _start_task(self) -> None:
         """Starts the task if the args have been set."""
-        if not self._args:
+        if not self._args or self._progress_bar.is_running():
             return
         self._error_msg.hide()
         self._success_msg.hide()
@@ -214,3 +222,7 @@ class ButtonWithProgressBar(QWidget):
             *args (any): must match the signature of the given function
         """
         self._args = args
+
+    def is_running(self) -> bool:
+        """Returns true if the progress_bar is currently executing a task"""
+        return self._progress_bar.is_running()

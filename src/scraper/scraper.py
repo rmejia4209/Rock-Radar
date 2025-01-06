@@ -79,23 +79,23 @@ def create_country_map(states: list[Tag]) -> None:
 
 def add_international_countries(url: str, countries: dict[str, int]) -> None:
     """
-    Adds contries with over 50 routes and their coresponding ID's to
+    Adds countries with over 50 routes and their corresponding ID's to
     the given dictionary.
     Args:
         url: URL that contains continents in the navbar
-        contries: dictionary that maps contries and their ID's
+        countries: dictionary that maps countries and their ID's
     """
     continents = get_navbar_anchor_tags(url)
     for continent in continents:
         country_tags = get_navbar_anchor_tags(continent.get('href'))
         for country_tag in country_tags:
             area_name, area_id = get_area_name_and_id(country_tag.get('href'))
-            countries[area_name] = {'id': area_id, 'dowloaded': False}
+            countries[area_name] = {'id': area_id, 'downloaded': False}
 
 
 def save_area_ids() -> None:
     """
-    Saves a dictionary with contries and their ID's
+    Saves a dictionary with countries and their ID's
     """
     area_urls = get_main_area_urls()
     area_urls.pop()
@@ -124,7 +124,7 @@ def get_route_distribution(html: BeautifulSoup) -> dict[str, int] | None:
     """
 
     load_dotenv()
-    container_id = os.getenv('AREA_STATS_CONTAINTER')
+    container_id = os.getenv('AREA_STATS_CONTAINER')
     element_type = os.getenv('AREA_STATS_ELEMENT')
     regex_pattern = os.getenv('AREA_STATS_REGEX')
 
@@ -151,7 +151,7 @@ def clean_data(data: dict[str, list[str | int]]) -> dict[str, int]:
     return clean_data
 
 
-def is_manageble(data: dict[str, int]) -> bool:
+def is_manageable(data: dict[str, int]) -> bool:
     """
     Returns true if area is small enough to be downloaded.
     Args:
@@ -298,7 +298,7 @@ def download_area(area_id: str, area_name: str) -> None:
     soup = BeautifulSoup(response.text, 'html.parser')
     area_grade_distribution = get_route_distribution(soup)
 
-    if is_manageble(area_grade_distribution):
+    if is_manageable(area_grade_distribution):
         download_area_helper(area_id, area_name, area_grade_distribution)
 
     else:

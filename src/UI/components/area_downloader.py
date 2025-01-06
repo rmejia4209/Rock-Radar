@@ -1,13 +1,12 @@
 import os
-from random import randint
 from PyQt5.QtWidgets import (
-    QWidget, QFrame, QLabel, QScrollArea, QVBoxLayout, QHBoxLayout
+    QWidget, QFrame, QScrollArea, QVBoxLayout, QHBoxLayout
 )
 from PyQt5.QtCore import pyqtSignal, Qt
 from UI.custom_widgets.buttons import Link
 from UI.custom_widgets.feedback import ButtonWithProgressBar
 from UI.custom_widgets.composites import SingleStatDisplay
-from utils.utils import gen_func
+from scraper.scraper import download_and_merge_data
 
 
 class AreaList(QScrollArea):
@@ -18,13 +17,13 @@ class AreaList(QScrollArea):
         super().__init__(parent=parent)
         self._container = QWidget(parent=self)
         self._areas = self._create_links(areas)
-        
+
         self._set_style()
 
     def _create_links(self, areas: list[str]) -> list[Link]:
         """
         Creates a list of links based on the provided list
-        
+
         Args:
             areas (list[str]): list of areas
 
@@ -53,7 +52,7 @@ class AreaList(QScrollArea):
 
     def _set_style(self) -> None:
         self._set_content_layout()
-        #self.setFrameShape(QFrame.NoFrame)
+        # self.setFrameShape(QFrame.NoFrame)
         self.setWidget(self._container)
         self.setWidgetResizable(True)
         return
@@ -61,7 +60,7 @@ class AreaList(QScrollArea):
     def remove_region(self, region: str) -> None:
         """
         Removes the region from the list of areas.
-        
+
         Args:
             region (str): the name of the region to be removed
         """
@@ -95,7 +94,7 @@ class AreaDownloads(QFrame):
             )
         self._download_button = ButtonWithProgressBar(
             "Download Area",
-            gen_func,  # replace
+            download_and_merge_data,  # replace
             error_icon_path=os.path.join(parent_dir, 'warning.png'),
             success_icon_path=os.path.join(parent_dir, 'check.png'),
             success_msg='Area successfully downloaded!',
@@ -125,7 +124,7 @@ class AreaDownloads(QFrame):
     def _update_args(self, region: str) -> None:
         """Updates the download buttons args"""
         if not self._download_button.is_running():
-            self._download_button.set_args(self._data[region], region)
+            self._download_button.set_args(self._data[region]['id'], region)
             self._current_region = region
             self._num_routes_stat.update_val(self._data[region]['routes'])
             self._num_routes_stat.update_label(f'Number of Routes in {region}')

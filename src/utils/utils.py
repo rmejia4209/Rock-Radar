@@ -1,7 +1,6 @@
 import csv
 import json
 import os
-import time
 from typing import Any
 
 from custom_types.custom_types import CSVData
@@ -97,11 +96,3 @@ def string_to_int(s: str) -> int():
         int: integer conversion of given string
     """
     return int(s.replace(' ', '').replace(',', ''))
-
-
-def gen_func(*args):
-
-    yield sum(args)
-    for num in args:
-        time.sleep(0.1)
-        yield num

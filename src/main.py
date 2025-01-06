@@ -4,6 +4,7 @@ from UI.app import MainWindow
 from data.route_builder import (
     build_area_tree, get_areas_available_for_download
 )
+from parser.parser import build_json_sources
 from scraper.scraper import save_area_ids
 
 
@@ -25,9 +26,9 @@ def main(cmd: str):
     elif cmd == 'init-areas':
         save_area_ids()
     elif cmd == 'save-region':
-        # TODO
-        get_areas_available_for_download()
-        #pass
+        pass
+    elif cmd == 'build-src-data':
+        build_json_sources()
 
 
 if __name__ == "__main__":

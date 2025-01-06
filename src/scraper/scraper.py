@@ -3,6 +3,7 @@ import os
 import re
 import requests
 import time
+from typing import Callable
 from dotenv import load_dotenv
 from urllib.parse import urlencode, urlparse, urlunparse
 from bs4 import BeautifulSoup, Comment
@@ -254,15 +255,16 @@ def scrape_data(area_id: str, param_1_val: str, param_2_val: str) -> None:
     )
     params = constant_parameters | variable_params
     routes_url, reviews_url = url_generator(params)
-    time.sleep(30)
+    time.sleep(1)
     get_reviews(reviews_url)
-    time.sleep(30)
+    time.sleep(1)
     get_routes(routes_url)
     return
 
 
 def download_area_helper(
-    area_id: str, area_name: str, grade_distribution: dict[str, int]
+    area_id: str, area_name: str, grade_distribution: dict[str, int],
+    *, cache: list[int], callback: Callable[[int], None] = None
 ) -> None:
     """TODO"""
     grade_parameters = extract_data(
@@ -277,6 +279,14 @@ def download_area_helper(
         the first grade if the number of routes is less than 1000
         """
         nonlocal num_routes, param_1_val, param_2_val
+
+        if len(cache) == 1:
+            cache.append(0)
+        else:
+            cache[1] += num_routes
+        if callback:
+            callback(int(100 * cache[1] // cache[0]))
+
         num_routes = grade_distribution[grades[0]]
         param_1_val = grade_parameters[grades[0]][0]
         param_2_val = grade_parameters[grades[0]][1]
@@ -302,31 +312,46 @@ def download_area_helper(
     return
 
 
-def download_area(area_id: str, area_name: str) -> None:
+def download_area(
+    area_id: str, area_name: str, *, cache: list[int] = None,
+    callback: Callable[[int], None] = None
+
+) -> None:
     area_url = generate_area_url(area_id, area_name)
     response = requests.get(area_url)
     soup = BeautifulSoup(response.text, 'html.parser')
     area_grade_distribution = get_route_distribution(soup)
 
+    if cache is None:
+        cache = [0]
+        for grade in area_grade_distribution:
+            cache[0] += area_grade_distribution[grade]
+
     if is_manageable(area_grade_distribution):
-        download_area_helper(area_id, area_name, area_grade_distribution)
+        download_area_helper(
+            area_id, area_name, area_grade_distribution,
+            cache=cache, callback=callback
+        )
 
     else:
         sub_areas = get_navbar_anchor_tags(area_url, soup=soup)
         for sub_area in sub_areas:
             area_name, area_id = get_area_name_and_id(sub_area.get('href'))
-            download_area(area_id, area_name)
+            download_area(area_id, area_name, cache=cache, callback=callback)
         return
 
 
-def download_and_merge_data(area_id: str, area_name: str) -> None:
+def download_and_merge_data(
+    area_id: str, area_name: str,
+    callback: Callable[[int], None] = None
+) -> None:
     """
     Downloads the area's information & zips all of the resulting .csv files
     Args:
         area_id: the area's id
         area_name: the name of the area
     """
-    download_area(area_id, area_name)
+    download_area(area_id, area_name, callback=callback)
     parent_dir = os.path.dirname(os.path.dirname(__file__))
     file_name = f"{area_name.replace(' ', '_').lower()}.csv"
     src = os.path.join(parent_dir, 'parser', 'input_data')

@@ -67,7 +67,8 @@ class Worker(QThread):
 
     Attributes:
         _func (Callable[..., int]):
-            Generator function that is executed when the run method is called
+            function that is executed when the run method is called. Must
+            accept a callback function as the last argument.
         _args (Any):
             Arguments passed to the generator function. Must be set prior to
             calling the run method
@@ -94,11 +95,19 @@ class Worker(QThread):
 
     def set_args(self, *args) -> None:
         """
-        Sets the args to be passed to the saved generator during execution.
+        Sets the args to be passed to the saved during execution of the
+        saved function. Adds the callback function as the last function.
+
         Args:
             *args (any): must match the signature of the given function
         """
-        self._args = args
+        self._args = args + (self.callback, )
+
+    def callback(self, num: int) -> None:
+        """
+        Emits the progress signal. Passed to the function saved.
+        """
+        self.progress.emit(num)
 
     def run(self) -> None:
         """
@@ -106,10 +115,9 @@ class Worker(QThread):
         If an error is encountered, the error is emitted via the error signal.
         A success signal is emitted on completion.
         """
-        nums = list(range(0, 30))
         try:
-            for progress in self._func(*nums):  # self._func(*self._args):
-                self.progress.emit(progress)
+            print(*self._args)
+            self._func(*self._args)
             self.success.emit()
         except Exception as e:
             self.error.emit(str(e))
@@ -146,7 +154,7 @@ class ProgressBar(QWidget):
         self._worker.set_args(*args)
         self._worker.start()
         return
-    
+
     def is_running(self) -> bool:
         """Returns true if the worker is still running"""
         return self._worker.isRunning()

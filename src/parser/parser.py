@@ -89,6 +89,7 @@ def build_json_sources(areas: list[str] | None = None) -> None:
         areas (list[str]): Optional list of areas to build a source file for
 
     """
+    areas = list(map(lambda area: area.replace(' ', '_').lower(), areas))
     src_folder = os.path.join(os.path.dirname(__file__), 'crags_by_area')
     dest_folder = os.path.join(
         os.path.dirname(os.path.dirname(__file__)), 'data', 'crags_by_area')

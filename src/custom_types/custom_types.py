@@ -46,3 +46,6 @@ RouteDict = dict[str, RouteDetails]
 
 # Alias for a dictionary that maps route id's to number of reviews
 ReviewStatsDict = dict[str, int]
+
+# Alias for a dictionary that contains areas and high level information
+AreaMap = dict[str, dict[str, str | int]]

@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QStackedLayout
 import qdarktheme
 from UI.navbar import NavBar
 from UI.home import Home
-from UI.settings import Settings
+from UI.pages.settings_page import SettingsPage
 from custom_types.node import Node
 # TODO: add data def & management here
 # TODO: add signal/slot to update node changes
@@ -16,7 +16,7 @@ class MainWindow(QMainWindow):
     _data: Node
     _navbar: NavBar
     _home: Home
-    _settings: Settings
+    _settings: SettingsPage
 
     def __init__(
         self, data_root: Node, available_areas: dict[str, dict[str, str | int]]
@@ -26,7 +26,7 @@ class MainWindow(QMainWindow):
         self._data = data_root
         self._navbar = NavBar(f"{self._data.name}", parent=self)
         self._home = Home(data_root, parent=self)
-        self._settings = Settings(data_root, available_areas, parent=self)
+        self._settings = SettingsPage(data_root, available_areas, parent=self)
         self._connect_widgets()
 
         self._pages_layout = QStackedLayout()

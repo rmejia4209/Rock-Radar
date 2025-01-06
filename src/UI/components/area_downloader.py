@@ -7,7 +7,7 @@ from UI.custom_widgets.buttons import Link
 from UI.custom_widgets.feedback import ButtonWithProgressBar
 from UI.custom_widgets.composites import SingleStatDisplay
 from scraper.scraper import download_and_merge_data
-
+from custom_types.custom_types import AreaMap
 
 class AreaList(QScrollArea):
 
@@ -74,12 +74,11 @@ class AreaList(QScrollArea):
         self._areas.pop(tar_idx)
 
 
-class AreaDownloads(QFrame):
+class AreaDownloader(QFrame):
 
-    def __init__(
-        self, available_areas: dict[str, dict[str, str | int]],
-        *, parent: QWidget
-    ) -> None:
+    new_region_added = pyqtSignal(str)
+
+    def __init__(self, available_areas: AreaMap, *, parent: QWidget) -> None:
         super().__init__(parent=parent)
 
         self._data = available_areas
@@ -94,7 +93,7 @@ class AreaDownloads(QFrame):
             )
         self._download_button = ButtonWithProgressBar(
             "Download Area",
-            download_and_merge_data,  # replace
+            download_and_merge_data,
             error_icon_path=os.path.join(parent_dir, 'warning.png'),
             success_icon_path=os.path.join(parent_dir, 'check.png'),
             success_msg='Area successfully downloaded!',
@@ -115,6 +114,7 @@ class AreaDownloads(QFrame):
         """
         self._sidebar.remove_region(self._current_region)
         del self._data[self._current_region]
+        self.new_region_added.emit(self._current_region)
         self._current_region = None
         self._num_routes_stat.update_val(
             sum([self._data[region]['routes'] for region in self._data])

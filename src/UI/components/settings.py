@@ -4,13 +4,13 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import pyqtSignal
 from UI.custom_widgets.labels import HeaderLabel
 from UI.custom_widgets.inputs import DropDown, RadioButtons
-from UI.components.area_downloader import AreaDownloads
+from UI.components.area_downloader import AreaDownloader
 from custom_types.crag import Area
 
 
 class SortingSettings(QFrame):
     """
-    TODO: doc string
+    This widget groups together settings related to sorting crags & routes.
     """
 
     def __init__(
@@ -25,7 +25,7 @@ class SortingSettings(QFrame):
         self._crag_sorting = DropDown(
             crag_options, 'Sort routes by', 'Please select', parent=self
         )
-        self._set_style()
+        self._set_main_layout()
 
     def _create_dropdown_layout(self) -> QHBoxLayout:
         """Returns a horizontal layout with the dropdowns"""
@@ -34,41 +34,42 @@ class SortingSettings(QFrame):
             layout.addWidget(widget)
         return layout
 
-    def _set_style(self) -> None:
+    def _set_main_layout(self) -> None:
         """Sets the main layout and style of the widget"""
         layout = QVBoxLayout()
         layout.addWidget(self._title)
         layout.addLayout(self._create_dropdown_layout())
         self.setLayout(layout)
-        self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
-        self.setLineWidth(1)
 
-    def get_selections(self) -> dict[str, str] | None:
+    def get_selections(self) -> tuple[str, str]:
         """Returns the current sort key selections"""
-        area_option = self._area_sorting.current_val
-        crag_option = self._crag_sorting.current_val
-
-        if area_option and crag_option:
-            return {'node': area_option, 'leaf': crag_option}
-        return
+        return self._area_sorting.current_val, self._crag_sorting.current_val
 
 
 class ModelOptions(QFrame):
+    """
+    Contains settings related to the model used to compare crags.
+
+    The raw model is simply the sum of the product of popularity and rating
+    for each route in a crag (i.e., sum([popularity * rating])).
+
+    The logarithmic model is the sum of the the product of the log of the
+    popularity and rating for each route in a crag
+    (i.e., sum([log(popularity) * rating])). This
+    """
+
     def __init__(self, options: list[str], *, parent: QWidget) -> None:
-        """TODO"""
         super().__init__(parent=parent)
         self._title = HeaderLabel('Model Options', parent=self)
         self._model_options = RadioButtons(options, parent=self)
-        self._set_style()
+        self._set_layout()
 
-    def _set_style(self) -> None:
+    def _set_layout(self) -> None:
         """Sets the layout of the widget"""
         layout = QVBoxLayout()
         for widget in [self._title, self._model_options]:
             layout.addWidget(widget)
         self.setLayout(layout)
-        self.setFrameStyle(QFrame.StyledPanel | QFrame.Plain)
-        self.setLineWidth(1)
 
     def get_selection(self) -> str:
         """Returns the currently selected model"""
@@ -76,6 +77,9 @@ class ModelOptions(QFrame):
 
 
 class MetricSelection(QFrame):
+    """
+    Groups together settings for metrics displayed next to crags and routes.
+    """
     def __init__(
         self, area_options: list[str], crag_options: list[str],
         *, parent: QWidget
@@ -92,14 +96,18 @@ class MetricSelection(QFrame):
         )
         self._set_style()
 
+    def _create_dropdown_layout(self) -> QHBoxLayout:
+        """Returns a horizontal layout with the dropdowns"""
+        layout = QHBoxLayout()
+        for widget in [self._area_metrics, self._crag_metrics]:
+            layout.addWidget(widget)
+        return layout
+
     def _set_style(self) -> None:
         """Set the style of the widget"""
         main_layout = QVBoxLayout()
         main_layout.addWidget(self._title)
-        options = QHBoxLayout()
-        for widget in [self._area_metrics, self._crag_metrics]:
-            options.addWidget(widget)
-        main_layout.addLayout(options)
+        main_layout.addLayout(self._create_dropdown_layout())
         self.setLayout(main_layout)
 
     def get_selections(self) -> None:
@@ -109,14 +117,11 @@ class MetricSelection(QFrame):
 
 class Settings(QWidget):
     """
-    TODO
+    Container widget that contains settings for the app
     """
     settings_changed = pyqtSignal()
 
-    def __init__(
-        self, data_root: Area,
-        available_areas: dict[str, dict[str, str | int]], *, parent: QWidget
-    ) -> None:
+    def __init__(self, data_root: Area, *, parent: QWidget) -> None:
         super().__init__(parent=parent)
         self._data_root = data_root
         self._sort_settings = SortingSettings(
@@ -130,38 +135,35 @@ class Settings(QWidget):
         )
         self._apply = QPushButton("Apply")
 
-        self._area_downloader = AreaDownloads(available_areas, parent=self)
-
         self._connect_widgets()
-        self._set_style()
-
-    @property
-    def title(self):
-        return "Settings"
+        self._set_main_layout()
 
     def _connect_widgets(self):
         self._apply.clicked.connect(self.apply_sort_settings)
 
-    def _group_left_side(self):
+    def _group_left_side(self) -> QVBoxLayout:
         layout = QVBoxLayout()
         for widget in [self._sort_settings, self._metrics]:
             layout.addWidget(widget)
         return layout
 
-    def _group_right_side(self):
+    def _group_right_side(self) -> QVBoxLayout:
         layout = QVBoxLayout()
         layout.addWidget(self._model_options)
         return layout
 
-    def _set_style(self) -> None:
-        """TODO:"""
+    def _group_top(self) -> QHBoxLayout:
+        """Returns a layout with the left and right sides added in"""
+        layout = QHBoxLayout()
+        for side in [self._group_left_side(), self._group_right_side()]:
+            layout.addLayout(side)
+        return layout
+
+    def _set_main_layout(self) -> None:
+        """Sets the main layout of the container widget"""
         main_layout = QVBoxLayout()
-        widget_layout = QHBoxLayout()
-        for layout in [self._group_left_side(), self._group_right_side()]:
-            widget_layout.addLayout(layout)
-        main_layout.addLayout(widget_layout)
+        main_layout.addLayout(self._group_top())
         main_layout.addWidget(self._apply)
-        main_layout.addWidget(self._area_downloader)
         self.setLayout(main_layout)
 
     def _set_model(self) -> None:
@@ -172,10 +174,10 @@ class Settings(QWidget):
         return
 
     def _set_sort_keys(self) -> None:
-        """Attempts to set the sorting keys if selected"""
-        sort_keys = self._sort_settings.get_selections()
-        if sort_keys:
-            self._data_root.set_sort_keys(sort_keys)
+        """Sets the sorting keys if both have been selected"""
+        node_key, leaf_key = self._sort_settings.get_selections()
+        if node_key and leaf_key:
+            self._data_root.set_sort_keys({'node': node_key, 'leaf': leaf_key})
         return
 
     def _set_display_metrics(self) -> None:

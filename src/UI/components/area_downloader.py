@@ -9,6 +9,7 @@ from UI.custom_widgets.composites import SingleStatDisplay
 from scraper.scraper import download_and_merge_data
 from custom_types.custom_types import AreaMap
 
+
 class AreaList(QScrollArea):
 
     area_selected = pyqtSignal(str)

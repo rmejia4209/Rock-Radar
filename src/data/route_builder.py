@@ -7,6 +7,28 @@ from custom_types.custom_types import RouteDict
 from utils.utils import extract_data
 
 
+def get_region_fp(region: str) -> str:
+    """
+    Returns the file path of the given region.
+
+    Args:
+        region (str): the name of the region.
+    Returns:
+        str | None:
+            the file path of the corresponding json file, or none if the
+            file does not exist.
+    """
+
+    region = region.replace(' ', '_').lower()
+
+    fp = os.path.join(
+        os.path.dirname(__file__), 'crags_by_area', f'{region}.json'
+    )
+    if os.path.exists(fp):
+        return fp
+    return
+
+
 def get_areas_available_for_download():
     """Returns all of the areas that have not been downloaded"""
     src = os.path.join(os.path.dirname(__file__), 'crags_by_area')

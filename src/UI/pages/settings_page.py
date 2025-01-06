@@ -24,7 +24,7 @@ class SettingsPage(QWidget):
     @property
     def title(self):
         return self._title
-    
+
     def _connect_widgets(self) -> None:
         """
         Connects the children widget's signals to the containers signals

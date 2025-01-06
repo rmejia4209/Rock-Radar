@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import pyqtSignal
 from UI.custom_widgets.labels import HeaderLabel
 from UI.custom_widgets.inputs import DropDown, RadioButtons
-from UI.components.area_downloader import AreaDownloader
 from custom_types.crag import Area
 
 

@@ -18,13 +18,15 @@ class MainWindow(QMainWindow):
     _home: Home
     _settings: Settings
 
-    def __init__(self, data_root: Node) -> None:
+    def __init__(
+        self, data_root: Node, available_areas: dict[str, dict[str, str | int]]
+    ) -> None:
         """TODO: write doc string"""
         super().__init__()
         self._data = data_root
         self._navbar = NavBar(f"{self._data.name}", parent=self)
         self._home = Home(data_root, parent=self)
-        self._settings = Settings(data_root, parent=self)
+        self._settings = Settings(data_root, available_areas, parent=self)
         self._connect_widgets()
 
         self._pages_layout = QStackedLayout()

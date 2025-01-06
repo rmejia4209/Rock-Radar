@@ -22,7 +22,9 @@ def get_area_name_and_id(url: str) -> tuple[str, str]:
     return url_parts[-1].replace('-', ' ').title(), url_parts[-2]
 
 
-def get_navbar_anchor_tags(url: str, soup: BeautifulSoup = None) -> list[Tag]:
+def get_navbar_anchor_tags(
+    url: str, *, soup: BeautifulSoup = None, include_num_routes: bool = False
+) -> list[Tag] | list[tuple[Tag, int]]:
     """
     Returns a list of tags in the URL's navbar
     Args:
@@ -44,37 +46,45 @@ def get_navbar_anchor_tags(url: str, soup: BeautifulSoup = None) -> list[Tag]:
         val = navbar_link.select_one(f'{val_id}')
         if link and val and string_to_int(val.get_text()) > 50:
             tags.append((link, string_to_int(val.get_text())))
+
+    if include_num_routes:
+        return tags
     return [
         anchor for anchor, val in sorted([t for t in tags], key=lambda t: t[1])
     ]
 
 
-def get_main_area_urls() -> list[Tag]:
+def get_main_area_urls() -> list[tuple[Tag, int]]:
     """Returns the main areas per the source URL's homepage"""
     load_dotenv()
     url = os.getenv('URL')
     table_id = os.getenv('TABLE_ID')
-    area_tag = os.getenv('AREA_TAG')
+    num_routes = os.getenv('NUMBER_OF_ROUTES')
 
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
-    return soup.find(id=table_id).select(area_tag)
+    main_regions = []
+    for num in soup.find(id=table_id).select(num_routes):
+        region = num.find_next_sibling()
+        main_regions.append((region, string_to_int(num.get_text())))
+    return main_regions
 
 
 def create_country_map(states: list[Tag]) -> None:
     """
-    Returns a dictionary with the USA's key populated with the states
-    and their ID's
+    Returns a dictionary populated with usa states and their ID and total
+    number of routes
+
     Args:
         states: list of tags to the state's info page
     """
-    countries = {'USA': []}
-    for state in states:
-        area_name, area_id = get_area_name_and_id(state.get("href"))
-        countries['USA'].append({
-            area_name: {'id': area_id, 'downloaded': False}
-        })
-    return countries
+    regions = {}
+    for link, num_routes in states:
+        area_name, area_id = get_area_name_and_id(link.get("href"))
+        if area_name == 'International' or area_name == 'In Progress':
+            continue
+        regions[area_name] = {'id': area_id, 'routes': num_routes}
+    return regions
 
 
 def add_international_countries(url: str, countries: dict[str, int]) -> None:
@@ -87,26 +97,28 @@ def add_international_countries(url: str, countries: dict[str, int]) -> None:
     """
     continents = get_navbar_anchor_tags(url)
     for continent in continents:
-        country_tags = get_navbar_anchor_tags(continent.get('href'))
-        for country_tag in country_tags:
+        country_tags = get_navbar_anchor_tags(
+            continent.get('href'), include_num_routes=True
+        )
+        for country_tag, routes in country_tags:
             area_name, area_id = get_area_name_and_id(country_tag.get('href'))
-            countries[area_name] = {'id': area_id, 'downloaded': False}
+            countries[area_name] = {'id': area_id, 'routes': routes}
 
 
 def save_area_ids() -> None:
     """
-    Saves a dictionary with countries and their ID's
+    Saves a dictionary with regions and their ID's
     """
     area_urls = get_main_area_urls()
     area_urls.pop()
-    countries = create_country_map(area_urls[:-1])
+    regions = create_country_map(area_urls[:-1])
 
-    international_url = area_urls[-1].get('href')
-    add_international_countries(international_url, countries)
+    international_url = area_urls[-1][0].get('href')
+    add_international_countries(international_url, regions)
     fp = os.path.join(
         os.path.dirname(os.path.dirname(__file__)), 'data', 'area_map.json'
     )
-    save_json_data(fp, countries)
+    save_json_data(fp, regions)
 
 
 def generate_area_url(area_id: str, area_name: str) -> str:
@@ -242,11 +254,9 @@ def scrape_data(area_id: str, param_1_val: str, param_2_val: str) -> None:
     )
     params = constant_parameters | variable_params
     routes_url, reviews_url = url_generator(params)
-    time.sleep(15)
-    print(f'Getting reviews for {area_id}')
+    time.sleep(30)
     get_reviews(reviews_url)
-    time.sleep(15)
-    print(f'Getting routes for {area_id}')
+    time.sleep(30)
     get_routes(routes_url)
     return
 
@@ -302,7 +312,7 @@ def download_area(area_id: str, area_name: str) -> None:
         download_area_helper(area_id, area_name, area_grade_distribution)
 
     else:
-        sub_areas = get_navbar_anchor_tags(area_url, soup)
+        sub_areas = get_navbar_anchor_tags(area_url, soup=soup)
         for sub_area in sub_areas:
             area_name, area_id = get_area_name_and_id(sub_area.get('href'))
             download_area(area_id, area_name)

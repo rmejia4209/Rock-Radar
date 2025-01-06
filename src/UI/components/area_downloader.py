@@ -74,31 +74,16 @@ class AreaList(QScrollArea):
                 tar_idx = idx
         self._areas.pop(tar_idx)
 
+
 class AreaDownloads(QFrame):
 
     def __init__(
-        self, *, parent: QWidget
+        self, available_areas: dict[str, dict[str, str | int]],
+        *, parent: QWidget
     ) -> None:
         super().__init__(parent=parent)
-        areas: dict[str, dict[str, str]]
-        states = [
-            'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-            'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia',
-            'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas',
-            'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts',
-            'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana',
-            'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
-            'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma',
-            'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina',
-            'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-            'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-        ]
 
-        self._data = {
-            state: {'id': f'{index+1:02}', 'routes': randint(50, 50000)}
-            for index, state in enumerate(states)
-        }
-
+        self._data = available_areas
         self._sidebar = AreaList(list(self._data.keys()), parent=self)
         parent_dir = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), 'Icons'

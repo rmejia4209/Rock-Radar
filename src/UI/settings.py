@@ -113,7 +113,10 @@ class Settings(QWidget):
     """
     settings_changed = pyqtSignal()
 
-    def __init__(self, data_root: Area, *, parent: QWidget):
+    def __init__(
+        self, data_root: Area,
+        available_areas: dict[str, dict[str, str | int]], *, parent: QWidget
+    ) -> None:
         super().__init__(parent=parent)
         self._data_root = data_root
         self._sort_settings = SortingSettings(
@@ -127,7 +130,7 @@ class Settings(QWidget):
         )
         self._apply = QPushButton("Apply")
 
-        self.foo = AreaDownloads(parent=self)
+        self._area_downloader = AreaDownloads(available_areas, parent=self)
 
         self._connect_widgets()
         self._set_style()
@@ -158,7 +161,7 @@ class Settings(QWidget):
             widget_layout.addLayout(layout)
         main_layout.addLayout(widget_layout)
         main_layout.addWidget(self._apply)
-        main_layout.addWidget(self.foo)
+        main_layout.addWidget(self._area_downloader)
         self.setLayout(main_layout)
 
     def _set_model(self) -> None:

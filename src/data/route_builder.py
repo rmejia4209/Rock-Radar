@@ -7,6 +7,21 @@ from custom_types.custom_types import RouteDict
 from utils.utils import extract_data
 
 
+def get_areas_available_for_download():
+    """Returns all of the areas that have not been downloaded"""
+    src = os.path.join(os.path.dirname(__file__), 'crags_by_area')
+    saved_areas = list(
+        map(
+            lambda region: region.split('.')[0].replace('_', ' ').title(),
+            os.listdir(src)
+        )
+    )
+    areas = extract_data(os.path.join(os.path.dirname(src), 'area_map.json'))
+    for area in saved_areas:
+        areas.pop(area, None)
+    return areas
+
+
 def find_existing_area(root: Area, area_name: str) -> Area | None:
     """
     Iterates through the root's subareas and returns a match if found.

@@ -197,7 +197,7 @@ class Area(Node):
         Returns the available statistics that may be displayed when printed
         """
         metrics = [stat.title() for stat in type(self)._leaf_attributes.keys()]
-        for metric in ['Name', 'Grade', 'Score', "Rating"]:
+        for metric in ['Name', 'Grade', 'Score']:
             metrics.remove(metric)
         return metrics
 

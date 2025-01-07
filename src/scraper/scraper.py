@@ -283,7 +283,7 @@ def download_area_helper(
         if len(cache) == 1:
             cache.append(0)
         else:
-            cache[1] += num_routes
+            cache[1] += num_routes if num_routes is not None else 0
         if callback:
             callback(int(100 * cache[1] // cache[0]))
 

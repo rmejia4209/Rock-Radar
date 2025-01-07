@@ -1,8 +1,8 @@
 # from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QStackedLayout
 import qdarktheme
-from UI.navbar import NavBar
-from UI.home import Home
+from UI.components.navbar import NavBar
+from UI.pages.home_page import HomePage
 from UI.pages.settings_page import SettingsPage
 from custom_types.crag import Area
 from data.route_builder import (
@@ -18,7 +18,7 @@ class MainWindow(QMainWindow):
     """
     _root: Area
     _navbar: NavBar
-    _home: Home
+    _home: HomePage
     _settings: SettingsPage
 
     def __init__(self) -> None:
@@ -27,7 +27,7 @@ class MainWindow(QMainWindow):
         self._root = self._build_tree()
 
         self._navbar = NavBar(f"{self._root.name}", parent=self)
-        self._home = Home(self._root, parent=self)
+        self._home = HomePage(self._root, parent=self)
         self._settings = SettingsPage(
             self._root, get_areas_available_for_download(), parent=self
         )
@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
         """Customize the widgets displayed by the app"""
         # title & size
         self.setWindowTitle("Rock Radar")
-        self.setFixedSize(1200, 900)
+        self.setFixedSize(1300, 900)
         qdarktheme.enable_hi_dpi()
         qdarktheme.setup_theme("light")
         return

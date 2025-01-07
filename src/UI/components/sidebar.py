@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import QWidget, QFrame, QVBoxLayout
 from PyQt5.QtCore import pyqtSignal
 from UI.custom_widgets.buttons import ButtonWithIcon
 from UI.custom_widgets.navigation import ScrollableLinkList
-from UI.custom_widgets.labels import RegularLabel
 from custom_types.node import Node
 
 
@@ -16,7 +15,6 @@ class Sidebar(QFrame):
         self._current_node = current_node
 
         fp = os.path.join(os.path.dirname(__file__), "Icons", "back.png")
-        self._search = RegularLabel("Search Coming Soon", parent=self)
         self._back_button = ButtonWithIcon("Back", fp, parent=self)
         self._links = ScrollableLinkList(self._current_node, parent=self)
 
@@ -43,7 +41,7 @@ class Sidebar(QFrame):
     def _set_layout(self) -> None:
         """Sets the layout of the widget"""
         layout = QVBoxLayout()
-        for widget in [self._search, self._back_button, self._links]:
+        for widget in [self._back_button, self._links]:
             layout.addWidget(widget)
         layout.setSpacing(5)
         self.setLayout(layout)

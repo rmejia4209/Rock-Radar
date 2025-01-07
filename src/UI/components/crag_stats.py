@@ -18,7 +18,7 @@ class CragStats(QFrame):
             label="Number of Matching Routes",
             parent=self
         )
-        self._grade_frequence = BarGraph(
+        self._grade_frequencies = BarGraph(
             node.grades, 'Crag Grades', parent=self
         )
 
@@ -35,7 +35,7 @@ class CragStats(QFrame):
         """Returns the main layout"""
         layout = QVBoxLayout()
         layout.addLayout(self._create_top_row())
-        layout.addWidget(self._grade_frequence)
+        layout.addWidget(self._grade_frequencies)
         return layout
 
     def _set_style(self):
@@ -44,4 +44,4 @@ class CragStats(QFrame):
     def update(self, node) -> None:
         self._matching_routes.update_val(node.num_matching_routes)
         self._route_types.update_data(node.route_types)
-        self._grade_frequence.update_data(node.grades)
+        self._grade_frequencies.update_data(node.grades)

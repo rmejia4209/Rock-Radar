@@ -6,7 +6,9 @@ from UI.custom_widgets.navigation import DualPageNavBar
 class NavBar(DualPageNavBar):
     """.DS_Store"""
     def __init__(self, title: str, parent: QWidget) -> None:
-        parent_folder = os.path.join(os.path.dirname(__file__), "Icons")
+        parent_folder = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "Icons"
+        )
         file_paths = (
             os.path.join(parent_folder, "gear.png"),
             os.path.join(parent_folder, "home.png")

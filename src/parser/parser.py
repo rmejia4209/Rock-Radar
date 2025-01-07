@@ -65,7 +65,7 @@ def build_route_dict(routes: CSVData) -> RouteDict:
     Returns:
         RouteDict: A dictionary with details on multiple routes
     """
-    src = os.path.join(os.path.dirname(__file__), "reviews_data.json")
+    src = os.path.join(os.path.dirname(__file__), "reviews.json")
     num_reviews_by_id: ReviewStatsDict = extract_data(src)
 
     route_data: RouteDict = {}
@@ -89,7 +89,8 @@ def build_json_sources(areas: list[str] | None = None) -> None:
         areas (list[str]): Optional list of areas to build a source file for
 
     """
-    areas = list(map(lambda area: area.replace(' ', '_').lower(), areas))
+    if areas:
+        areas = list(map(lambda area: area.replace(' ', '_').lower(), areas))
     src_folder = os.path.join(os.path.dirname(__file__), 'crags_by_area')
     dest_folder = os.path.join(
         os.path.dirname(os.path.dirname(__file__)), 'data', 'crags_by_area')
@@ -98,6 +99,7 @@ def build_json_sources(areas: list[str] | None = None) -> None:
         file = file.split('.')[0]
         if areas and file not in areas:
             continue
+        print(file)
         data = extract_data(os.path.join(src_folder, f'{file}.csv'))
         save_json_data(
             os.path.join(dest_folder, f'{file}.json'), build_route_dict(data)

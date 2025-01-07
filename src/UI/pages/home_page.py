@@ -1,14 +1,12 @@
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 from PyQt5.QtCore import pyqtSignal
-from UI.sidebar import Sidebar
-from UI.crag_stats import CragStats
-from UI.route_filter import RouteFilterWidget
+from UI.components.sidebar import Sidebar
+from UI.components.crag_stats import CragStats
+from UI.components.route_filter import RouteFilterWidget
 from custom_types.node import Node
 
-# TODO: add signal/slot to update node changes
 
-
-class Home(QWidget):
+class HomePage(QWidget):
     """
     TODO: write doc string
     """
@@ -24,7 +22,7 @@ class Home(QWidget):
             self._data.route_filter, parent=self
         )
         self._connect_widgets()
-        self._set_style()
+        self._set_layout()
         return
 
     @property
@@ -52,7 +50,7 @@ class Home(QWidget):
             layout.addWidget(view)
         return layout
 
-    def _set_style(self) -> None:
+    def _set_layout(self) -> None:
         main_layout = QHBoxLayout()
         main_layout.addWidget(self._side_bar)
         main_layout.addLayout(self._create_details_layout())

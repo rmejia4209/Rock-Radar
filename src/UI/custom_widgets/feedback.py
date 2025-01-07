@@ -116,7 +116,6 @@ class Worker(QThread):
         A success signal is emitted on completion.
         """
         try:
-            print(*self._args)
             self._func(*self._args)
             self.success.emit()
         except Exception as e:

@@ -99,7 +99,6 @@ def build_json_sources(areas: list[str] | None = None) -> None:
         file = file.split('.')[0]
         if areas and file not in areas:
             continue
-        print(file)
         data = extract_data(os.path.join(src_folder, f'{file}.csv'))
         save_json_data(
             os.path.join(dest_folder, f'{file}.json'), build_route_dict(data)
